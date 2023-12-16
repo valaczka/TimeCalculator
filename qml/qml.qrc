@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>AppBar.qml</file>
+        <file>main.qml</file>
+        <file>MainStackView.qml</file>
+        <file>PageStart.qml</file>
+        <file>QPage.qml</file>
+    </qresource>
+</RCC>

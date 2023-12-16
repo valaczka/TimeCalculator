@@ -1,0 +1,12 @@
+[submodule "lib/Qaterial"]
+	path = lib/Qaterial
+	url = git@github.com:valaczka/Qaterial.git
+[submodule "lib/QOlm"]
+	path = lib/QOlm
+	url = git@github.com:valaczka/QOlm.git
+[submodule "lib/CuteLogger"]
+	path = lib/CuteLogger
+	url = git@github.com:valaczka/CuteLogger.git
+[submodule "lib/MaterialDesignSvgo"]
+	path = lib/MaterialDesignSvgo
+	url = https://github.com/OlivierLDff/MaterialDesignSvgo.git
