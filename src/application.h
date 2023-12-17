@@ -28,27 +28,45 @@
 #define APPLICATION_H
 
 #include "abstractapplication.h"
+#include "database.h"
 
 class Application : public AbstractApplication
 {
     Q_OBJECT
 
+    Q_PROPERTY(Database* database READ database NOTIFY databaseChanged FINAL)
+
 public:
     Application(QGuiApplication *app);
     virtual ~Application();
 
-     Q_INVOKABLE void testSql(const bool &close = false);
+    Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral("*"));
+    Q_INVOKABLE virtual void dbSave();
+    Q_INVOKABLE bool dbCreate(const QString &title);
+    Q_INVOKABLE void dbClose();
+
+    Q_INVOKABLE static int yearsBetween(const QDate &date1, const QDate &date2);
+    Q_INVOKABLE static int daysBetween(const QDate &date1, const QDate &date2);
+
+    Database* database() const;
+    void setDatabase(Database *newDatabase);
+    void setDatabase(std::unique_ptr<Database> &newDatabase);
 
 public slots:
     virtual void onApplicationStarted();
 
 signals:
-    void addedToDb(QString txt);
+    void databaseChanged();
 
 protected:
     virtual bool loadResources();
     virtual void registerQmlTypes();
     virtual void setAppContextProperty();
+
+    bool loadFromJson(const QJsonObject &data);
+
+    std::unique_ptr<Database> m_database;
+
 };
 
 #endif // APPLICATION_H

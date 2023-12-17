@@ -25,7 +25,7 @@ Qaterial.ToolBar {
 		{
 			id: backButton
 			icon.source: Qaterial.Icons.arrowLeft
-			onClicked: Client.stackPop()
+			onClicked: App.stackPop()
 		}
 
 		Column {

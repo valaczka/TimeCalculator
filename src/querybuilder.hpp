@@ -65,6 +65,7 @@
 
 
 typedef std::function<QJsonValue(const QVariant&)> FieldConvertFunc;
+typedef std::function<QVariant(const QVariant&)> FieldConvertVariantFunc;
 
 
 /**
@@ -103,7 +104,7 @@ private:
 
         Type type = Positional;
         QVariant value;
-        const char *name = nullptr;
+        QByteArray name;
 
         Bind() {}
         Bind(const Type &t, const QVariant &v, const char *n) : type(t), value(v), name(n) {}
@@ -185,6 +186,7 @@ public:
 
     std::optional<QJsonArray> execToJsonArray(const QMap<QString, FieldConvertFunc> &map);
     std::optional<QJsonObject> execToJsonObject(const QMap<QString, FieldConvertFunc> &map);
+    std::optional<QVariantList> execToVariantList(const QMap<QString, FieldConvertVariantFunc> &map);
     std::optional<QVariant> execToValue(const char *field);
     std::optional<QVariant> execToValue(const char *field, const QVariant &defaultValue);
 
@@ -213,7 +215,7 @@ public:
 
 inline bool QueryBuilder::exec()
 {
-    QString q;
+    QByteArray q;
 
     auto bit = m_bind.constBegin();
 
@@ -230,16 +232,16 @@ inline bool QueryBuilder::exec()
             if (bit != m_bind.constEnd()) {
                 if (prev != m_queryString.constEnd() && prev->type == QueryString::Bind) {
                     if (bit->type == Bind::Positional)
-                        q += QStringLiteral(",?");
+                        q += QByteArrayLiteral(",?");
                     else if (bit->type == Bind::List)
-                        q += QStringLiteral(",?").repeated(bit->value.toList().size());
+                        q += QByteArrayLiteral(",?").repeated(bit->value.toList().size());
                     else if (bit->type == Bind::Named)
-                        q += QStringLiteral(",").append(bit->name);
+                        q += QByteArrayLiteral(",").append(bit->name);
                 } else {
                     if (bit->type == Bind::Positional)
-                        q += QStringLiteral("?");
+                        q += QByteArrayLiteral("?");
                     else if (bit->type == Bind::List)
-                        q += QStringLiteral("?")+QStringLiteral(",?").repeated(bit->value.toList().size()-1);
+                        q += QByteArrayLiteral("?")+QByteArrayLiteral(",?").repeated(bit->value.toList().size()-1);
                     else if (bit->type == Bind::Named)
                         q += bit->name;
                 }
@@ -258,7 +260,7 @@ inline bool QueryBuilder::exec()
                 if (b.type != Bind::Field)
                     continue;
 
-                if (has)	q += QStringLiteral(",");
+                if (has)	q += QByteArrayLiteral(",");
                 q += b.name;
                 has = true;
             }
@@ -274,9 +276,9 @@ inline bool QueryBuilder::exec()
                     continue;
 
                 if (has)
-                    q += QStringLiteral(",?");
+                    q += QByteArrayLiteral(",?");
                 else {
-                    q += QStringLiteral("?");
+                    q += QByteArrayLiteral("?");
                     has = true;
                 }
             }
@@ -292,9 +294,9 @@ inline bool QueryBuilder::exec()
                     continue;
 
                 if (has)
-                    q += QStringLiteral(",")+b.name+QStringLiteral("=?");
+                    q += QByteArrayLiteral(",")+b.name+QByteArrayLiteral("=?");
                 else {
-                    q += b.name+QStringLiteral("=?");
+                    q += b.name+QByteArrayLiteral("=?");
                     has = true;
                 }
             }
@@ -432,7 +434,7 @@ inline std::optional<QJsonArray> QueryBuilder::execToJsonArray(const QMap<QStrin
             if (map.contains(f)) {
                 const FieldConvertFunc &func = map.value(f);
                 const QJsonValue &v = std::invoke(func, rec.value(i));
-                obj.insert(f, v);
+                if (!v.isNull()) obj.insert(f, v);
             } else {
                 obj.insert(rec.fieldName(i), rec.value(i).toJsonValue());
             }
@@ -465,7 +467,7 @@ inline std::optional<QJsonObject> QueryBuilder::execToJsonObject(const QMap<QStr
             if (map.contains(f)) {
                 const FieldConvertFunc &func = map.value(f);
                 const QJsonValue &v = std::invoke(func, rec.value(i));
-                obj.insert(f, v);
+                if (!v.isNull()) obj.insert(f, v);
             } else {
                 obj.insert(rec.fieldName(i), rec.value(i).toJsonValue());
             }
@@ -473,6 +475,41 @@ inline std::optional<QJsonObject> QueryBuilder::execToJsonObject(const QMap<QStr
     }
 
     return obj;
+}
+
+
+
+/**
+ * @brief QueryBuilder::execToVariantList
+ * @param map
+ * @return
+ */
+
+inline std::optional<QVariantList> QueryBuilder::execToVariantList(const QMap<QString, FieldConvertVariantFunc> &map)
+{
+    if (!exec()) return std::nullopt;
+
+    QVariantList list;
+
+    while (m_sqlQuery.next()) {
+        const QSqlRecord &rec = m_sqlQuery.record();
+        QVariantMap obj;
+
+        for (int i=0; i<rec.count(); ++i) {
+            const QString &f = rec.fieldName(i);
+            if (map.contains(f)) {
+                const FieldConvertVariantFunc &func = map.value(f);
+                const QVariant &v = std::invoke(func, rec.value(i));
+                if (!v.isNull()) obj.insert(f, v);
+            } else {
+                obj.insert(rec.fieldName(i), rec.value(i).toJsonValue());
+            }
+        }
+
+        list.append(obj);
+    }
+
+    return list;
 }
 
 

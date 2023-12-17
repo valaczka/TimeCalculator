@@ -5,5 +5,28 @@
         <file>MainStackView.qml</file>
         <file>PageStart.qml</file>
         <file>QPage.qml</file>
+        <file>QButton.qml</file>
+        <file>QScrollable.qml</file>
+        <file>PullToRefreshHandler.qml</file>
+        <file>RefreshIndicator.qml</file>
+        <file>QFabButton.qml</file>
+        <file>QFormCheckButton.qml</file>
+        <file>QFormColumn.qml</file>
+        <file>QFormComboBox.qml</file>
+        <file>QFormRadioButton.qml</file>
+        <file>QFormSection.qml</file>
+        <file>QFormSpinBox.qml</file>
+        <file>QFormSwitchButton.qml</file>
+        <file>QFormTextArea.qml</file>
+        <file>QFormTextField.qml</file>
+        <file>PageJobEdit.qml</file>
+        <file>QIconLabel.qml</file>
+        <file>QSpinBox.qml</file>
+        <file>JScript.js</file>
+        <file>PageCalculationEdit.qml</file>
+        <file>CalculationLabel.qml</file>
+        <file>PageDatabase.qml</file>
+        <file>QMenu.qml</file>
+        <file>QMenuItem.qml</file>
     </qresource>
 </RCC>

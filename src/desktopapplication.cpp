@@ -25,6 +25,8 @@
  */
 
 #include "desktopapplication.h"
+#include "ColorConsoleAppender.h"
+#include "Logger.h"
 
 /**
  * @brief DesktopApplication::DesktopApplication
@@ -33,5 +35,16 @@
 DesktopApplication::DesktopApplication(QGuiApplication *app)
     : Application(app)
 {
+    auto appender = new ColorConsoleAppender;
 
+    appender->setDetailsLevel(Logger::Trace);
+
+    cuteLogger->registerAppender(appender);
+
+    cuteLogger->logToGlobalInstance(QStringLiteral("app"), true);
+    cuteLogger->logToGlobalInstance(QStringLiteral("utils"), true);
+    cuteLogger->logToGlobalInstance(QStringLiteral("qml"), true);
+    cuteLogger->logToGlobalInstance(QStringLiteral("db"), true);
+    cuteLogger->logToGlobalInstance(QStringLiteral("logger"), true);
+    cuteLogger->logToGlobalInstance(QStringLiteral("qaterial.utils"), true);
 }

@@ -27,12 +27,14 @@
 #ifndef UTILS__H
 #define UTILS__H
 
+#include "qmetaobject.h"
 #include <QObject>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QColor>
 #include <optional>
+#include <qslistmodel.h>
 
 /**
  * @brief The Utils class
@@ -85,10 +87,7 @@ public:
     Q_INVOKABLE static void settingsSet(const QString &key, const QVariant &value);
     Q_INVOKABLE static void settingsClear(const QString &key);
 
-#ifdef CLIENT_UTILS
     static const QModelIndex& noParent();
-
-    Q_INVOKABLE static int selectedCount(qolm::QOlmBase *list);
 
     template<typename QEnum>
     static std::string enumToString(const QEnum value)
@@ -108,6 +107,7 @@ public:
     Q_INVOKABLE static void setClipboardText(const QString &text);
     Q_INVOKABLE static QString clipboardText();
 
+#ifdef CLIENT_UTILS
     Q_INVOKABLE void checkStoragePermissions();
     Q_INVOKABLE void checkMediaPermissions();
 #endif

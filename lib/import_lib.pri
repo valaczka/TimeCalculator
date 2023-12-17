@@ -28,3 +28,8 @@ android|ios|wasm {
 	INCLUDEPATH += $$PWD/CuteLogger/include
 	LIBS += -lCuteLogger
 }
+
+
+# QSyncable
+
+include(qsyncable.pri)

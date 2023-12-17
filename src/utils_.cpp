@@ -26,13 +26,16 @@
 
 #include "utils_.h"
 #include "Logger.h"
+#include "qclipboard.h"
 #include "qdesktopservices.h"
 #include "qdir.h"
 #include "qfileinfo.h"
 #include "qjsondocument.h"
 #include "qmath.h"
+#include "qsdiffrunner.h"
 #include "qsettings.h"
 #include <QStandardPaths>
+#include <QGuiApplication>
 #include <random>
 
 
@@ -486,42 +489,7 @@ void Utils::settingsClear(const QString &key)
 }
 
 
-#ifdef CLIENT_UTILS
 
-/**
- * @brief Utils::noParent
- * @return
- */
-
-const QModelIndex &Utils::noParent()
-{
-    static const QModelIndex ret = QModelIndex();
-    return ret;
-}
-
-
-/**
- * @brief Utils::selectedCount
- * @param list
- * @return
- */
-
-
-int Utils::selectedCount(qolm::QOlmBase *list)
-{
-    if (!list)
-        return 0;
-
-    int num = 0;
-
-    foreach (QObject *o, list->children()) {
-        SelectableObject *s = qobject_cast<SelectableObject*>(o);
-        if (s && s->selected())
-            ++num;
-    }
-
-    return num;
-}
 
 
 
@@ -580,7 +548,7 @@ void Utils::patchSListModel(QSListModel *model, const QVariantList &data, const 
 
 void Utils::setClipboardText(const QString &text)
 {
-    QClipboard *clipboard = QApplication::clipboard();
+    QClipboard *clipboard = QGuiApplication::clipboard();
 
     if (!clipboard) {
         LOG_CERROR("utils") << "Cliboard unavailable";
@@ -598,7 +566,7 @@ void Utils::setClipboardText(const QString &text)
 
 QString Utils::clipboardText()
 {
-    QClipboard *clipboard = QApplication::clipboard();
+    QClipboard *clipboard = QGuiApplication::clipboard();
 
     if (!clipboard) {
         LOG_CERROR("utils") << "Cliboard unavailable";
@@ -609,7 +577,7 @@ QString Utils::clipboardText()
 }
 
 
-
+#ifdef CLIENT_UTILS
 
 /**
  * @brief Utils::checkStoragePermissions

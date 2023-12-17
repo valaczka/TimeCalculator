@@ -3,14 +3,14 @@ lessThan(QT_MAJOR_VERSION, 6): error(Minimum Qt version 6 required)
 TEMPLATE = app
 TARGET = test-sql
 
-QT += gui quick svg quickcontrols2 sql
+QT += gui quick svg quickcontrols2 sql gui-private
 
 CONFIG += c++17
 CONFIG += separate_debug_info
 
 include(../common.pri)
 include(../version/version.pri)
-#include(../../translations/translations.pri)
+include(../translations/translations.pri)
 
 DESTDIR = ..
 
@@ -26,17 +26,32 @@ include(../lib/import_lib.pri)
 SOURCES += \
 	abstractapplication.cpp \
 	application.cpp \
-	desktopapplication.cpp \
+	database.cpp \
 	main.cpp \
-	onlineapplication.cpp \
 	utils_.cpp
+
+wasm {
+	SOURCES += \
+		onlineapplication.cpp
+
+	HEADERS += \
+		onlineapplication.h
+
+} else {
+	SOURCES += \
+		desktopapplication.cpp
+
+	HEADERS += \
+		desktopapplication.h
+}
+
+
 
 HEADERS += \
 	../version/version.h \
 	abstractapplication.h \
 	application.h \
-	desktopapplication.h \
-	onlineapplication.h \
+	database.h \
 	querybuilder.hpp \
 	utils_.h
 

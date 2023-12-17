@@ -5,6 +5,7 @@ import Qaterial as Qaterial
 import "./QaterialHelper" as Qaterial
 import TimeCalculator
 import Qt5Compat.GraphicalEffects
+import "JScript.js" as JS
 
 Qaterial.ApplicationWindow
 {
@@ -35,13 +36,11 @@ Qaterial.ApplicationWindow
 
 	Component.onCompleted:
 	{
-		/*JS.intializeStyle()
-
-		setPixelSize(Client.Utils.settingsGet("window/fontSize", Qaterial.Style.defaultPixelSize))
+		JS.intializeStyle()
 
 		Qaterial.Style.dialog.implicitWidth = Qt.binding(function() {
 			return Math.min(mainWindow.width*.9, 400 * Qaterial.Style.pixelSizeRatio)
-		})*/
+		})
 
 		App.mainStack = mainStackView
 		App.mainWindow = mainWindow
@@ -154,9 +153,9 @@ Qaterial.ApplicationWindow
 						onAccepted: function()
 						{
 							if (_pop)
-								Client.stackPop(_index, true)
+								App.stackPop(_index, true)
 							else
-								Client.closeWindow(true)
+								App.closeWindow(true)
 						},
 						text: _text,
 						title: _pop ? qsTr("Bezárás") : qsTr("Kilépés"),

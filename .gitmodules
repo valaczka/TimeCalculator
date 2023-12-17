@@ -10,3 +10,6 @@
 [submodule "lib/MaterialDesignSvgo"]
 	path = lib/MaterialDesignSvgo
 	url = https://github.com/OlivierLDff/MaterialDesignSvgo.git
+[submodule "lib/qsyncable"]
+	path = lib/qsyncable
+	url = git@github.com:valaczka/qsyncable.git

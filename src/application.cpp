@@ -26,7 +26,6 @@
 
 #include "application.h"
 #include "Logger.h"
-#include "querybuilder.hpp"
 #include "utils_.h"
 
 
@@ -48,61 +47,136 @@ Application::Application(QGuiApplication *app)
 
 Application::~Application()
 {
-testSql(true);
+
 }
 
 
 
 /**
- * @brief Application::testSql
- * @param close
+ * @brief Application::dbOpen
  */
 
-void Application::testSql(const bool &close)
+void Application::dbOpen(const QString &)
 {
-    static const QString &dbName = QStringLiteral("testDb");
+    if (m_database)
+        return messageError(tr("Már meg van nyitva egy adatbázis!"));
 
-    if (close) {
-        if (QSqlDatabase::contains(dbName)) {
-            QSqlDatabase::removeDatabase(dbName);
+    if (QFile::exists("/tmp/_test.json")) {
+        const auto &json = Utils::fileToJsonObject("/tmp/_test.json");
+        if (!json) {
+            messageError(tr("Érvénytelen fájl"));
+        } else {
+            loadFromJson(*json);
         }
-
-        return;
-    }
-
-    if (!QSqlDatabase::contains(dbName)) {
-        snack("Add database");
-        auto db = QSqlDatabase::addDatabase("QSQLITE", dbName);
-        db.setDatabaseName(":memory:");
-        DB_LOG_DEBUG() << "Open DB" << db.open();
-        if (!QueryBuilder::q(db)
-                 .addQuery("CREATE TABLE test(id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)")
-                 .exec()) {
-            messageError("Create error");
-        }
-        return;
-    }
-
-    auto db = QSqlDatabase::database(dbName);
-
-    if (!QueryBuilder::q(db)
-             .addQuery("INSERT INTO test(timestamp) VALUES(CURRENT_TIMESTAMP)")
-             .exec()) {
-        messageError("Insert error");
-        return;
-    }
-
-    snack("added");
-
-    auto list = QueryBuilder::q(db).addQuery("SELECT * from test").execToJsonArray();
-
-    if (!list) {
-        messageError("Select error");
-    } else {
-        QJsonDocument doc(*list);
-        emit addedToDb(doc.toJson());
     }
 }
+
+
+
+/**
+ * @brief Application::dbSave
+ */
+
+void Application::dbSave()
+{
+    if (!m_database)
+        return messageError(tr("Nincs megnyitva adatbázis!"));
+
+    const auto &json = m_database->toJson();
+
+    if (json) {
+        if (Utils::jsonObjectToFile(*json, "/tmp/_test.json")) {
+            snack(tr("Mentés sikerült"));
+            m_database->setModified(false);
+        } else
+            messageError(tr("Sikertelen mentés"));
+    }
+}
+
+
+
+/**
+ * @brief Application::dbCreate
+ * @param title
+ */
+
+bool Application::dbCreate(const QString &title)
+{
+    if (m_database) {
+        messageError(tr("Már meg van nyitva egy adatbázis!"));
+        return false;
+    }
+
+    std::unique_ptr<Database> ptr(new Database);
+
+    if (ptr->prepare(ptr->databaseName())) {
+        ptr->setTitle(title);
+        ptr->sync();
+        ptr->setModified(true);
+        setDatabase(ptr);
+        stackPushPage(QStringLiteral("PageDatabase.qml"));
+        return true;
+    }
+
+    return false;
+}
+
+
+
+/**
+ * @brief Application::dbClose
+ */
+
+void Application::dbClose()
+{
+    if (m_database) {
+        std::unique_ptr<Database> db;
+        setDatabase(db);
+    }
+}
+
+
+
+/**
+ * @brief Application::yearsBetween
+ * @param date1
+ * @param date2
+ * @return
+ */
+
+int Application::yearsBetween(const QDate &date1, const QDate &date2)
+{
+    QDate d2 = date2.addDays(1);
+    QDate d(d2.year(), date1.month(), date1.day());
+
+    if (d2 < d)
+        return d2.year()-1-date1.year();
+    else
+        return d2.year()-date1.year();
+}
+
+
+/**
+ * @brief Application::daysBetween
+ * @param date1
+ * @param date2
+ * @return
+ */
+
+int Application::daysBetween(const QDate &date1, const QDate &date2)
+{
+    QDate d2 = date2.addDays(1);
+    QDate d(d2.year(), date1.month(), date1.day());
+
+    if (d2 < d) {
+        QDate from(d2.year()-1, date1.month(), date1.day());
+        return from.daysTo(d2);
+    } else {
+        return d.daysTo(d2);
+    }
+}
+
+
 
 
 
@@ -122,8 +196,6 @@ void Application::onApplicationStarted()
 
 bool Application::loadResources()
 {
-    QStringList searchList;
-
     loadFonts({
         QStringLiteral(":/NotoSans-Italic-VariableFont_wdth,wght.ttf"),
         QStringLiteral(":/NotoSans-VariableFont_wdth,wght.ttf"),
@@ -160,4 +232,67 @@ void Application::registerQmlTypes()
 void Application::setAppContextProperty()
 {
     m_engine->rootContext()->setContextProperty("App", this);
+}
+
+
+
+/**
+ * @brief Application::loadFromJson
+ * @param data
+ * @return
+ */
+
+bool Application::loadFromJson(const QJsonObject &data)
+{
+    std::unique_ptr<Database> db = nullptr;
+
+    db.reset(Database::fromJson(data));
+    if (!db) {
+        messageError(tr("Érvénytelen adat"));
+        return false;
+    }
+
+    setDatabase(db);
+    stackPushPage(QStringLiteral("PageDatabase.qml"));
+
+    return true;
+}
+
+
+
+
+/**
+ * @brief Application::database
+ * @return
+ */
+
+Database*Application::database() const
+{
+    return m_database.get();
+}
+
+
+/**
+ * @brief Application::setDatabase
+ * @param newDatabase
+ */
+
+void Application::setDatabase(Database *newDatabase)
+{
+    std::unique_ptr<Database> ptr(newDatabase);
+    setDatabase(ptr);
+}
+
+
+/**
+ * @brief Application::setDatabase
+ * @param newDatabase
+ */
+
+void Application::setDatabase(std::unique_ptr<Database> &newDatabase)
+{
+    if (m_database == newDatabase)
+        return;
+    m_database = std::move(newDatabase);
+    emit databaseChanged();
 }

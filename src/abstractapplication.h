@@ -61,6 +61,8 @@ class AbstractApplication : public QObject
     Q_PROPERTY(Utils* Utils READ utils CONSTANT)
     Q_PROPERTY(bool debug READ debug CONSTANT)
 
+    Q_PROPERTY(QString version READ getVersion CONSTANT)
+
 public:
     AbstractApplication(QGuiApplication *app);
     virtual ~AbstractApplication();
@@ -72,6 +74,7 @@ public:
     static int versionBuild();
     static const char *version();
     static void initialize();
+    static QString getVersion() { return version(); }
 
     QGuiApplication *application() const;
     QQmlApplicationEngine *engine() const;
