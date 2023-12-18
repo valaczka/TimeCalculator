@@ -9,9 +9,11 @@ Qaterial.StackView
 
 	signal stackViewLoaded()
 
-	initialItem: Qaterial.LabelHeadline1 {
+	initialItem: Qaterial.LabelBody2 {
 		//anchors.centerIn: parent
-		text: "Loading..."
+		horizontalAlignment: Text.AlignHCenter
+		verticalAlignment: Text.AlignVCenter
+		text: qsTr("Betöltés...")
 		Component.onCompleted: stackViewLoaded()
 	}
 

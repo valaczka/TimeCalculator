@@ -45,7 +45,7 @@
  */
 
 Utils::Utils(QObject *parent)
-    : QObject{parent}
+	: QObject{parent}
 {
 
 }
@@ -70,23 +70,23 @@ Utils::~Utils()
 
 std::optional<QByteArray> Utils::fileContent(const QString &filename)
 {
-    QFile f(filename);
+	QFile f(filename);
 
-    if (!f.exists()) {
-        LOG_CWARNING("utils") << "Can't read file:" << filename;
-        return std::nullopt;
-    }
+	if (!f.exists()) {
+		LOG_CWARNING("utils") << "Can't read file:" << filename;
+		return std::nullopt;
+	}
 
-    if (!f.open(QIODevice::ReadOnly)) {
-        LOG_CWARNING("utils") << "Can't open file:" << filename;
-        return std::nullopt;
-    }
+	if (!f.open(QIODevice::ReadOnly)) {
+		LOG_CWARNING("utils") << "Can't open file:" << filename;
+		return std::nullopt;
+	}
 
-    QByteArray data = f.readAll();
+	QByteArray data = f.readAll();
 
-    f.close();
+	f.close();
 
-    return data;
+	return data;
 }
 
 
@@ -98,7 +98,7 @@ std::optional<QByteArray> Utils::fileContent(const QString &filename)
 
 QString Utils::fileBaseName(const QString &filename)
 {
-    return QFileInfo(filename).baseName();
+	return QFileInfo(filename).baseName();
 }
 
 
@@ -110,7 +110,7 @@ QString Utils::fileBaseName(const QString &filename)
 
 bool Utils::fileExists(const QUrl &file)
 {
-    return QFile::exists(file.toLocalFile());
+	return QFile::exists(file.toLocalFile());
 }
 
 
@@ -123,21 +123,21 @@ bool Utils::fileExists(const QUrl &file)
 
 bool Utils::jsonDocumentToFile(const QJsonDocument &doc, const QString &filename, const QJsonDocument::JsonFormat &format)
 {
-    const QByteArray &b = doc.toJson(format);
+	const QByteArray &b = doc.toJson(format);
 
-    QFile f(filename);
+	QFile f(filename);
 
-    if (!f.open(QIODevice::WriteOnly)) {
-        LOG_CWARNING("utils") << "Can't write file:" << filename;
+	if (!f.open(QIODevice::WriteOnly)) {
+		LOG_CWARNING("utils") << "Can't write file:" << filename;
 
-        return false;
-    }
+		return false;
+	}
 
-    f.write(b);
+	f.write(b);
 
-    f.close();
+	f.close();
 
-    return true;
+	return true;
 }
 
 
@@ -151,7 +151,7 @@ bool Utils::jsonDocumentToFile(const QJsonDocument &doc, const QString &filename
 
 bool Utils::jsonObjectToFile(const QJsonObject &object, const QString &filename, const QJsonDocument::JsonFormat &format)
 {
-    return jsonDocumentToFile(QJsonDocument(object), filename, format);
+	return jsonDocumentToFile(QJsonDocument(object), filename, format);
 }
 
 
@@ -165,7 +165,7 @@ bool Utils::jsonObjectToFile(const QJsonObject &object, const QString &filename,
 
 bool Utils::jsonArrayToFile(const QJsonArray &array, const QString &filename, const QJsonDocument::JsonFormat &format)
 {
-    return jsonDocumentToFile(QJsonDocument(array), filename, format);
+	return jsonDocumentToFile(QJsonDocument(array), filename, format);
 }
 
 
@@ -179,18 +179,18 @@ bool Utils::jsonArrayToFile(const QJsonArray &array, const QString &filename, co
 
 std::optional<QJsonDocument> Utils::byteArrayToJsonDocument(const QByteArray &data)
 {
-    if (data.isEmpty())
-        return QJsonDocument();
+	if (data.isEmpty())
+		return QJsonDocument();
 
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+	QJsonParseError error;
+	QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 
-    if (error.error != QJsonParseError::NoError) {
-        LOG_CWARNING("utils") << "JSON parse error:" << error.errorString() << error.error;
-        return std::nullopt;
-    }
+	if (error.error != QJsonParseError::NoError) {
+		LOG_CWARNING("utils") << "JSON parse error:" << error.errorString() << error.error;
+		return std::nullopt;
+	}
 
-    return doc;
+	return doc;
 }
 
 
@@ -202,15 +202,15 @@ std::optional<QJsonDocument> Utils::byteArrayToJsonDocument(const QByteArray &da
 
 std::optional<QJsonObject> Utils::byteArrayToJsonObject(const QByteArray &data)
 {
-    if (data.isEmpty())
-        return QJsonObject();
+	if (data.isEmpty())
+		return QJsonObject();
 
-    const std::optional<QJsonDocument> &doc = byteArrayToJsonDocument(data);
+	const std::optional<QJsonDocument> &doc = byteArrayToJsonDocument(data);
 
-    if (!doc || doc->isNull())
-        return std::nullopt;
+	if (!doc || doc->isNull())
+		return std::nullopt;
 
-    return doc->object();
+	return doc->object();
 }
 
 
@@ -222,15 +222,15 @@ std::optional<QJsonObject> Utils::byteArrayToJsonObject(const QByteArray &data)
 
 std::optional<QJsonArray> Utils::byteArrayToJsonArray(const QByteArray &data)
 {
-    if (data.isEmpty())
-        return QJsonArray();
+	if (data.isEmpty())
+		return QJsonArray();
 
-    const std::optional<QJsonDocument> &doc = byteArrayToJsonDocument(data);
+	const std::optional<QJsonDocument> &doc = byteArrayToJsonDocument(data);
 
-    if (!doc || doc->isNull())
-        return std::nullopt;
+	if (!doc || doc->isNull())
+		return std::nullopt;
 
-    return doc->array();
+	return doc->array();
 }
 
 
@@ -242,23 +242,23 @@ std::optional<QJsonArray> Utils::byteArrayToJsonArray(const QByteArray &data)
 
 std::optional<QJsonDocument> Utils::fileToJsonDocument(const QString &filename)
 {
-    QFile f(filename);
+	QFile f(filename);
 
-    if (!f.exists()) {
-        LOG_CWARNING("utils") << "Can't read file:" << filename;
-        return std::nullopt;
-    }
+	if (!f.exists()) {
+		LOG_CWARNING("utils") << "Can't read file:" << filename;
+		return std::nullopt;
+	}
 
-    if (!f.open(QIODevice::ReadOnly)) {
-        LOG_CWARNING("utils") << "Can't open file:" << filename;
-        return std::nullopt;
-    }
+	if (!f.open(QIODevice::ReadOnly)) {
+		LOG_CWARNING("utils") << "Can't open file:" << filename;
+		return std::nullopt;
+	}
 
-    QByteArray data = f.readAll();
+	QByteArray data = f.readAll();
 
-    f.close();
+	f.close();
 
-    return byteArrayToJsonDocument(data);
+	return byteArrayToJsonDocument(data);
 }
 
 
@@ -271,12 +271,12 @@ std::optional<QJsonDocument> Utils::fileToJsonDocument(const QString &filename)
 
 std::optional<QJsonObject> Utils::fileToJsonObject(const QString &filename)
 {
-    const std::optional<QJsonDocument> &doc = fileToJsonDocument(filename);
+	const std::optional<QJsonDocument> &doc = fileToJsonDocument(filename);
 
-    if (!doc || doc->isNull())
-        return std::nullopt;
+	if (!doc || doc->isNull())
+		return std::nullopt;
 
-    return doc->object();
+	return doc->object();
 }
 
 
@@ -290,12 +290,12 @@ std::optional<QJsonObject> Utils::fileToJsonObject(const QString &filename)
 
 std::optional<QJsonArray> Utils::fileToJsonArray(const QString &filename)
 {
-    const std::optional<QJsonDocument> &doc = fileToJsonDocument(filename);
+	const std::optional<QJsonDocument> &doc = fileToJsonDocument(filename);
 
-    if (!doc || doc->isNull())
-        return std::nullopt;
+	if (!doc || doc->isNull())
+		return std::nullopt;
 
-    return doc->array();
+	return doc->array();
 }
 
 
@@ -308,8 +308,8 @@ std::optional<QJsonArray> Utils::fileToJsonArray(const QString &filename)
 
 QColor Utils::colorSetAlpha(QColor color, const qreal &alpha)
 {
-    color.setAlphaF(alpha);
-    return color;
+	color.setAlphaF(alpha);
+	return color;
 }
 
 
@@ -323,34 +323,34 @@ QColor Utils::colorSetAlpha(QColor color, const qreal &alpha)
 
 QString Utils::formatMSecs(const int &msec, const int &decimals, const bool &withMinute)
 {
-    int s = qFloor((qreal)msec / 1000.0);
-    int ms = msec - 1000*s;
+	int s = qFloor((qreal)msec / 1000.0);
+	int ms = msec - 1000*s;
 
-    QString r;
+	QString r;
 
-    if (withMinute) {
-        int h = qFloor((qreal)msec / (60*60*1000.0));
-        int m = qFloor((qreal)msec / (60*1000.0)) - h*60;
-        s -= m*60 + h*60*60;
+	if (withMinute) {
+		int h = qFloor((qreal)msec / (60*60*1000.0));
+		int m = qFloor((qreal)msec / (60*1000.0)) - h*60;
+		s -= m*60 + h*60*60;
 
-        if (h > 0)
-            r += QStringLiteral("%1:").arg(h, 2, 10, QChar('0'));
+		if (h > 0)
+			r += QStringLiteral("%1:").arg(h, 2, 10, QChar('0'));
 
-        r += QStringLiteral("%1:%2").arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+		r += QStringLiteral("%1:%2").arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 
-        if (decimals > 0) {
-            QString n = QStringLiteral("%1").arg(ms, 3, 10, QChar('0'));
-            r += QStringLiteral(".")+n.left(decimals);
-        }
-    } else {
-        r = QString::number(s);
-        if (decimals > 0) {
-            QString n = QStringLiteral("%1").arg(ms, 3, 10, QChar('0'));
-            r += QStringLiteral(".")+n.left(decimals);
-        }
-    }
+		if (decimals > 0) {
+			QString n = QStringLiteral("%1").arg(ms, 3, 10, QChar('0'));
+			r += QStringLiteral(".")+n.left(decimals);
+		}
+	} else {
+		r = QString::number(s);
+		if (decimals > 0) {
+			QString n = QStringLiteral("%1").arg(ms, 3, 10, QChar('0'));
+			r += QStringLiteral(".")+n.left(decimals);
+		}
+	}
 
-    return r;
+	return r;
 }
 
 
@@ -362,8 +362,8 @@ QString Utils::formatMSecs(const int &msec, const int &decimals, const bool &wit
  */
 void Utils::openUrl(const QUrl &url)
 {
-    LOG_CDEBUG("utils") << "Open URL:" << url;
-    QDesktopServices::openUrl(url);
+	LOG_CDEBUG("utils") << "Open URL:" << url;
+	QDesktopServices::openUrl(url);
 }
 
 
@@ -375,10 +375,10 @@ void Utils::openUrl(const QUrl &url)
 
 QString Utils::standardPath(const QString &path)
 {
-    if (!path.isEmpty())
-        return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).at(0)+QStringLiteral("/")+path;
-    else
-        return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).at(0);
+	if (!path.isEmpty())
+		return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).at(0)+QStringLiteral("/")+path;
+	else
+		return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).at(0);
 }
 
 
@@ -394,22 +394,22 @@ QString Utils::genericDataPath(const QString &path)
 {
 #ifdef Q_OS_ANDROID
 #if QT_VERSION >= 0x060000
-    QJniObject mediaDir = QJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
-    QJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
+	QJniObject mediaDir = QJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
+	QJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
 #else
-    QAndroidJniObject mediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
-    QAndroidJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
+	QAndroidJniObject mediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
+	QAndroidJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
 #endif
-    if (!path.isEmpty())
-        return QStringLiteral("file://")+mediaPath.toString()+QStringLiteral("/")+path;
-    else
-        return QStringLiteral("file://")+mediaPath.toString();
+	if (!path.isEmpty())
+		return QStringLiteral("file://")+mediaPath.toString()+QStringLiteral("/")+path;
+	else
+		return QStringLiteral("file://")+mediaPath.toString();
 #endif
 
-    if (!path.isEmpty())
-        return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)+QStringLiteral("/")+path;
-    else
-        return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+	if (!path.isEmpty())
+		return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)+QStringLiteral("/")+path;
+	else
+		return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
 }
 
 
@@ -424,8 +424,8 @@ QString Utils::genericDataPath(const QString &path)
 
 QByteArray Utils::generateRandomString(quint8 length)
 {
-    const char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    return generateRandomString(length, characters);
+	const char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	return generateRandomString(length, characters);
 }
 
 
@@ -438,15 +438,15 @@ QByteArray Utils::generateRandomString(quint8 length)
 
 QByteArray Utils::generateRandomString(quint8 length, const char *characters)
 {
-    Q_ASSERT(characters && strlen(characters));
+	Q_ASSERT(characters && strlen(characters));
 
-    static std::mt19937 randomEngine(QDateTime::currentDateTime().toMSecsSinceEpoch());
-    std::uniform_int_distribution<int> distribution(0, strlen(characters)-1);
-    QByteArray data;
-    data.reserve(length);
-    for (quint8 i = 0; i < length; ++i)
-        data.append(characters[distribution(randomEngine)]);
-    return data;
+	static std::mt19937 randomEngine(QDateTime::currentDateTime().toMSecsSinceEpoch());
+	std::uniform_int_distribution<int> distribution(0, strlen(characters)-1);
+	QByteArray data;
+	data.reserve(length);
+	for (quint8 i = 0; i < length; ++i)
+		data.append(characters[distribution(randomEngine)]);
+	return data;
 }
 
 
@@ -459,8 +459,8 @@ QByteArray Utils::generateRandomString(quint8 length, const char *characters)
 
 QVariant Utils::settingsGet(const QString &key, const QVariant &defaultValue)
 {
-    QSettings s;
-    return s.value(key, defaultValue);
+	QSettings s;
+	return s.value(key, defaultValue);
 }
 
 
@@ -472,8 +472,8 @@ QVariant Utils::settingsGet(const QString &key, const QVariant &defaultValue)
 
 void Utils::settingsSet(const QString &key, const QVariant &value)
 {
-    QSettings s;
-    s.setValue(key, value);
+	QSettings s;
+	s.setValue(key, value);
 }
 
 
@@ -484,8 +484,8 @@ void Utils::settingsSet(const QString &key, const QVariant &value)
 
 void Utils::settingsClear(const QString &key)
 {
-    QSettings s;
-    s.remove(key);
+	QSettings s;
+	s.remove(key);
 }
 
 
@@ -501,23 +501,23 @@ void Utils::settingsClear(const QString &key)
 
 QStringList Utils::getRolesFromObject(const QMetaObject *object)
 {
-    QStringList roles;
+	QStringList roles;
 
-    for (int i = 0 ; i < object->propertyCount(); i++) {
-        const QMetaProperty &property = object->property(i);
+	for (int i = 0 ; i < object->propertyCount(); i++) {
+		const QMetaProperty &property = object->property(i);
 
-        if (!property.isValid() || !property.isReadable() || !property.isStored())
-            continue;
+		if (!property.isValid() || !property.isReadable() || !property.isStored())
+			continue;
 
-        const QString &p = property.name();
+		const QString &p = property.name();
 
-        if (p == QStringLiteral("objectName"))
-            continue;
+		if (p == QStringLiteral("objectName"))
+			continue;
 
-        roles.append(p);
-    }
+		roles.append(p);
+	}
 
-    return roles;
+	return roles;
 }
 
 
@@ -529,15 +529,15 @@ QStringList Utils::getRolesFromObject(const QMetaObject *object)
 
 void Utils::patchSListModel(QSListModel *model, const QVariantList &data, const QString &keyField)
 {
-    Q_ASSERT(model);
+	Q_ASSERT(model);
 
-    QSDiffRunner runner;
+	QSDiffRunner runner;
 
-    runner.setKeyField(keyField);
+	runner.setKeyField(keyField);
 
-    const QList<QSPatch> &patches = runner.compare(model->storage(), data);
+	const QList<QSPatch> &patches = runner.compare(model->storage(), data);
 
-    runner.patch(model, patches);
+	runner.patch(model, patches);
 }
 
 
@@ -548,14 +548,14 @@ void Utils::patchSListModel(QSListModel *model, const QVariantList &data, const 
 
 void Utils::setClipboardText(const QString &text)
 {
-    QClipboard *clipboard = QGuiApplication::clipboard();
+	QClipboard *clipboard = QGuiApplication::clipboard();
 
-    if (!clipboard) {
-        LOG_CERROR("utils") << "Cliboard unavailable";
-        return;
-    }
+	if (!clipboard) {
+		LOG_CERROR("utils") << "Cliboard unavailable";
+		return;
+	}
 
-    clipboard->setText(text);
+	clipboard->setText(text);
 }
 
 
@@ -566,14 +566,14 @@ void Utils::setClipboardText(const QString &text)
 
 QString Utils::clipboardText()
 {
-    QClipboard *clipboard = QGuiApplication::clipboard();
+	QClipboard *clipboard = QGuiApplication::clipboard();
 
-    if (!clipboard) {
-        LOG_CERROR("utils") << "Cliboard unavailable";
-        return QStringLiteral("");
-    }
+	if (!clipboard) {
+		LOG_CERROR("utils") << "Cliboard unavailable";
+		return QStringLiteral("");
+	}
 
-    return clipboard->text();
+	return clipboard->text();
 }
 
 
@@ -589,35 +589,35 @@ void Utils::checkStoragePermissions()
 #ifdef Q_OS_ANDROID
 
 #if QT_VERSION < 0x060000
-    QtAndroid::PermissionResult result1 = QtAndroid::checkPermission("android.permission.READ_EXTERNAL_STORAGE");
-    QtAndroid::PermissionResult result2 = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+	QtAndroid::PermissionResult result1 = QtAndroid::checkPermission("android.permission.READ_EXTERNAL_STORAGE");
+	QtAndroid::PermissionResult result2 = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
 
-    QStringList permissions;
+	QStringList permissions;
 
-    if (result1 == QtAndroid::PermissionResult::Denied)
-        permissions.append("android.permission.READ_EXTERNAL_STORAGE");
+	if (result1 == QtAndroid::PermissionResult::Denied)
+		permissions.append("android.permission.READ_EXTERNAL_STORAGE");
 
-    if (result2 == QtAndroid::PermissionResult::Denied)
-        permissions.append("android.permission.WRITE_EXTERNAL_STORAGE");
+	if (result2 == QtAndroid::PermissionResult::Denied)
+		permissions.append("android.permission.WRITE_EXTERNAL_STORAGE");
 
-    if (!permissions.isEmpty()) {
-        QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(permissions, 30000);
+	if (!permissions.isEmpty()) {
+		QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(permissions, 30000);
 
-        QList<QtAndroid::PermissionResult> results = resultHash.values();
-        if (results.isEmpty() || results.contains(QtAndroid::PermissionResult::Denied)) {
-            emit storagePermissionsDenied();
-            return;
-        }
-    }
+		QList<QtAndroid::PermissionResult> results = resultHash.values();
+		if (results.isEmpty() || results.contains(QtAndroid::PermissionResult::Denied)) {
+			emit storagePermissionsDenied();
+			return;
+		}
+	}
 #else
-    emit storagePermissionsDenied();
-    return;
+	emit storagePermissionsDenied();
+	return;
 #endif
 #else
 
 #endif
 
-    emit storagePermissionsGranted();
+	emit storagePermissionsGranted();
 }
 
 
@@ -633,51 +633,51 @@ void Utils::checkMediaPermissions()
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined (Q_OS_MAC)
 
 #if QT_VERSION < 0x060000 && defined(Q_OS_ANDROID)
-    QtAndroid::PermissionResult result0 = QtAndroid::checkPermission("android.permission.CAMERA");
+	QtAndroid::PermissionResult result0 = QtAndroid::checkPermission("android.permission.CAMERA");
 
-    QStringList permissions;
+	QStringList permissions;
 
-    if (result0 == QtAndroid::PermissionResult::Denied)
-        permissions.append("android.permission.CAMERA");
+	if (result0 == QtAndroid::PermissionResult::Denied)
+		permissions.append("android.permission.CAMERA");
 
-    if (!permissions.isEmpty()) {
-        QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(permissions, 30000);
+	if (!permissions.isEmpty()) {
+		QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(permissions, 30000);
 
-        QList<QtAndroid::PermissionResult> results = resultHash.values();
-        if (results.isEmpty() || results.contains(QtAndroid::PermissionResult::Denied)) {
-            emit mediaPermissionsDenied();
-            return;
-        }
-    }
+		QList<QtAndroid::PermissionResult> results = resultHash.values();
+		if (results.isEmpty() || results.contains(QtAndroid::PermissionResult::Denied)) {
+			emit mediaPermissionsDenied();
+			return;
+		}
+	}
 #elif QT_VERSION >= 0x060000
-    switch (qApp->checkPermission(QCameraPermission{}))
-    {
-    case Qt::PermissionStatus::Undetermined:
-        qApp->requestPermission(QCameraPermission{}, this, [this](const QPermission &permission) {
-            if (permission.status() == Qt::PermissionStatus::Granted)
-                emit mediaPermissionsGranted();
-            else if (permission.status() == Qt::PermissionStatus::Denied)
-                emit mediaPermissionsDenied();
-        });
-        break;
+	switch (qApp->checkPermission(QCameraPermission{}))
+	{
+		case Qt::PermissionStatus::Undetermined:
+			qApp->requestPermission(QCameraPermission{}, this, [this](const QPermission &permission) {
+				if (permission.status() == Qt::PermissionStatus::Granted)
+					emit mediaPermissionsGranted();
+				else if (permission.status() == Qt::PermissionStatus::Denied)
+					emit mediaPermissionsDenied();
+			});
+			break;
 
-    case Qt::PermissionStatus::Granted:
-        emit mediaPermissionsGranted();
-        break;
+		case Qt::PermissionStatus::Granted:
+			emit mediaPermissionsGranted();
+			break;
 
-    case Qt::PermissionStatus::Denied:
-        emit mediaPermissionsDenied();
-        break;
-    }
+		case Qt::PermissionStatus::Denied:
+			emit mediaPermissionsDenied();
+			break;
+	}
 
-    return;
+	return;
 
-
-#endif
 
 #endif
 
-    emit mediaPermissionsGranted();
+#endif
+
+	emit mediaPermissionsGranted();
 }
 
 
@@ -692,7 +692,7 @@ void Utils::checkMediaPermissions()
 
 quint32 Utils::versionCode(const int &major, const int &minor)
 {
-    return (1000*major)+minor;
+	return (1000*major)+minor;
 }
 
 

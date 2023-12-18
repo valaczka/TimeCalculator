@@ -13,13 +13,22 @@ QPage {
 
 	title: editData ? editData.name : qsTr("Új munkakör")
 
-	appBar.rightComponent: Qaterial.AppBarButton
-	{
-		action: _actionSave
-		display: AbstractButton.IconOnly
 
+	appBar.rightComponent: Row {
+		Qaterial.AppBarButton
+		{
+			action: _actionDelete
+			anchors.verticalCenter: parent.verticalCenter
+			display: AbstractButton.IconOnly
+			visible: editData
+		}
+		Qaterial.AppBarButton
+		{
+			action: _actionSave
+			anchors.verticalCenter: parent.verticalCenter
+			display: AbstractButton.IconOnly
+		}
 	}
-
 
 
 	QScrollable {
@@ -30,7 +39,7 @@ QPage {
 		QFormColumn {
 			id: _form
 
-			title: qsTr("Szerver adatai")
+			title: qsTr("Jogviszony adatai")
 
 			QFormTextField {
 				id: _start
@@ -43,7 +52,7 @@ QPage {
 					regularExpression: /(^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$)/
 				}
 				errorText: qsTr("Adj meg egy érvényes dátumot ebben a formában: ÉÉÉÉ-HH-NN")
-				leadingIconSource: Qaterial.Icons.calendarArrowLeft
+				leadingIconSource: Qaterial.Icons.calendarStart
 				trailingContent: Qaterial.TextFieldButtonContainer
 				{
 					Qaterial.TextFieldAlertIcon {  }
@@ -64,7 +73,7 @@ QPage {
 					regularExpression: /(^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$)|^$/
 				}
 				errorText: qsTr("Adj meg egy érvényes dátumot ebben a formában: ÉÉÉÉ-HH-NN")
-				leadingIconSource: Qaterial.Icons.calendarArrowRight
+				leadingIconSource: Qaterial.Icons.calendarEnd
 				trailingContent: Qaterial.TextFieldButtonContainer
 				{
 					Qaterial.TextFieldAlertIcon {  }
@@ -88,7 +97,7 @@ QPage {
 			}
 
 			QFormSection {
-				icon.source: Qaterial.Icons.compass
+				icon.source: Qaterial.Icons.accountTie
 				text: qsTr("Munkáltató vagy megbízó")
 			}
 
@@ -100,7 +109,7 @@ QPage {
 			}
 
 			QFormSection {
-				icon.source: Qaterial.Icons.compass
+				icon.source: Qaterial.Icons.fileDocumentEdit
 				text: qsTr("Foglalkoztatási jogviszony")
 			}
 
@@ -143,6 +152,16 @@ QPage {
 				anchors.horizontalCenter: parent.horizontalCenter
 				action: _actionSave
 			}
+
+
+			QButton
+			{
+				anchors.horizontalCenter: parent.horizontalCenter
+				action: _actionDelete
+				bgColor: Qaterial.Colors.red500
+				textColor: Qaterial.Colors.white
+				visible: editData
+			}
 		}
 
 	}
@@ -150,8 +169,8 @@ QPage {
 
 	Action {
 		id: _actionSave
-		text: qsTr("Mentés")
-		icon.source: Qaterial.Icons.contentSave
+		text: qsTr("Kész")
+		icon.source: Qaterial.Icons.checkBold
 		enabled: _start.acceptableInput && _end.acceptableInput && _form.modified
 		onTriggered:
 		{
@@ -193,6 +212,37 @@ QPage {
 		}
 	}
 
+
+	Action {
+		id: _actionDelete
+		text: qsTr("Törlés")
+		icon.source: Qaterial.Icons.delete_
+		enabled: editData
+		onTriggered:
+		{
+			Qaterial.DialogManager.showDialog(
+						{
+							onAccepted: function()
+							{
+								if (App.database.jobDelete(editData.id)) {
+									App.snack(qsTr("Sikeres törlés"))
+									_form.modified = false
+									App.stackPop()
+								} else {
+									App.messageError(qsTr("Törlés sikertelen"))
+								}
+							},
+							text: qsTr("Biztosan törlöd a munkakört?"),
+							title: editData.name,
+							iconSource: Qaterial.Icons.delete_,
+							iconColor: Qaterial.Colors.red500,
+							textColor: Qaterial.Colors.red500,
+							iconFill: false,
+							iconSize: Qaterial.Style.roundIcon.size,
+							standardButtons: DialogButtonBox.No | DialogButtonBox.Yes
+						})
+		}
+	}
 
 
 	function recalcDuration() {

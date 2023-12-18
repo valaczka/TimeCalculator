@@ -1,9 +1,11 @@
 lessThan(QT_MAJOR_VERSION, 6): error(Minimum Qt version 6 required)
 
 TEMPLATE = app
-TARGET = test-sql
+TARGET = TimeCalculator
 
-QT += gui quick svg quickcontrols2 sql gui-private
+QT += gui quick svg quickcontrols2 sql
+
+wasm: QT += gui-private
 
 CONFIG += c++17
 CONFIG += separate_debug_info

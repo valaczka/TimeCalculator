@@ -46,131 +46,141 @@ Q_DECLARE_OPAQUE_POINTER(Utils*)
 
 class AbstractApplication : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
-    Q_PROPERTY(QQuickItem *mainStack READ mainStack WRITE setMainStack NOTIFY mainStackChanged FINAL)
-    Q_PROPERTY(QQuickWindow *mainWindow READ mainWindow WRITE setMainWindow NOTIFY mainWindowChanged FINAL)
+	Q_PROPERTY(QQuickItem *mainStack READ mainStack WRITE setMainStack NOTIFY mainStackChanged FINAL)
+	Q_PROPERTY(QQuickWindow *mainWindow READ mainWindow WRITE setMainWindow NOTIFY mainWindowChanged FINAL)
 
-    Q_PROPERTY(qreal safeMarginLeft READ safeMarginLeft WRITE setSafeMarginLeft NOTIFY safeMarginLeftChanged FINAL)
-    Q_PROPERTY(qreal safeMarginRight READ safeMarginRight WRITE setSafeMarginRight NOTIFY safeMarginRightChanged FINAL)
-    Q_PROPERTY(qreal safeMarginTop READ safeMarginTop WRITE setSafeMarginTop NOTIFY safeMarginTopChanged FINAL)
-    Q_PROPERTY(qreal safeMarginBottom READ safeMarginBottom WRITE setSafeMarginBottom NOTIFY safeMarginBottomChanged FINAL)
+	Q_PROPERTY(qreal safeMarginLeft READ safeMarginLeft WRITE setSafeMarginLeft NOTIFY safeMarginLeftChanged FINAL)
+	Q_PROPERTY(qreal safeMarginRight READ safeMarginRight WRITE setSafeMarginRight NOTIFY safeMarginRightChanged FINAL)
+	Q_PROPERTY(qreal safeMarginTop READ safeMarginTop WRITE setSafeMarginTop NOTIFY safeMarginTopChanged FINAL)
+	Q_PROPERTY(qreal safeMarginBottom READ safeMarginBottom WRITE setSafeMarginBottom NOTIFY safeMarginBottomChanged FINAL)
 
-    Q_PROPERTY(bool fullScreenHelper READ fullScreenHelper WRITE setFullScreenHelper NOTIFY fullScreenHelperChanged)
+	Q_PROPERTY(bool fullScreenHelper READ fullScreenHelper WRITE setFullScreenHelper NOTIFY fullScreenHelperChanged)
 
-    Q_PROPERTY(Utils* Utils READ utils CONSTANT)
-    Q_PROPERTY(bool debug READ debug CONSTANT)
+	Q_PROPERTY(Utils* Utils READ utils CONSTANT)
+	Q_PROPERTY(bool debug READ debug CONSTANT)
 
-    Q_PROPERTY(QString version READ getVersion CONSTANT)
+	Q_PROPERTY(QString version READ getVersion CONSTANT)
 
 public:
-    AbstractApplication(QGuiApplication *app);
-    virtual ~AbstractApplication();
+	AbstractApplication(QGuiApplication *app);
+	virtual ~AbstractApplication();
 
-    int run();
+	int run();
 
-    static int versionMajor();
-    static int versionMinor();
-    static int versionBuild();
-    static const char *version();
-    static void initialize();
-    static QString getVersion() { return version(); }
+	static int versionMajor();
+	static int versionMinor();
+	static int versionBuild();
+	static const char *version();
+	static void initialize();
+	static QString getVersion() { return version(); }
 
-    QGuiApplication *application() const;
-    QQmlApplicationEngine *engine() const;
+	QGuiApplication *application() const;
+	QQmlApplicationEngine *engine() const;
 
-    static AbstractApplication *instance();
-    Utils *utils() const;
-    bool debug() const;
+	static AbstractApplication *instance();
+	Utils *utils() const;
+	bool debug() const;
 
-    Q_INVOKABLE void messageInfo(const QString &text, const QString &title = "") const;
-    Q_INVOKABLE void messageWarning(const QString &text, const QString &title = "") const;
-    Q_INVOKABLE void messageError(const QString &text, const QString &title = "") const;
-    Q_INVOKABLE void snack(const QString &text) const;
+	Q_INVOKABLE void messageInfo(const QString &text, const QString &title = "") const;
+	Q_INVOKABLE void messageWarning(const QString &text, const QString &title = "") const;
+	Q_INVOKABLE void messageError(const QString &text, const QString &title = "") const;
+	Q_INVOKABLE void snack(const QString &text) const;
 
-    Q_INVOKABLE QQuickItem *stackPushPage(QString qml, QVariantMap parameters = {}) const;
-    Q_INVOKABLE bool stackPop(int index = -1, const bool &forced = false) const;
-    Q_INVOKABLE bool stackPop(QQuickItem *page) const;
-    Q_INVOKABLE bool stackPopToPage(QQuickItem *page) const;
+	Q_INVOKABLE QQuickItem *stackPushPage(QString qml, QVariantMap parameters = {}) const;
+	Q_INVOKABLE bool stackPop(int index = -1, const bool &forced = false) const;
+	Q_INVOKABLE bool stackPop(QQuickItem *page) const;
+	Q_INVOKABLE bool stackPopToPage(QQuickItem *page) const;
 
-    Q_INVOKABLE bool closeWindow(const bool &forced = false);
-    Q_INVOKABLE void notifyWindow();
+	Q_INVOKABLE bool closeWindow(const bool &forced = false);
+	Q_INVOKABLE void notifyWindow();
 
-    Q_INVOKABLE void safeMarginsGet();
-    void setSafeMargins(const QMarginsF &margins);
+	Q_INVOKABLE void safeMarginsGet();
+	void setSafeMargins(const QMarginsF &margins);
 
-    Q_INVOKABLE qreal getDevicePixelSizeCorrection() const;
+	Q_INVOKABLE qreal getDevicePixelSizeCorrection() const;
 
-    Q_INVOKABLE void retranslate(const QString &language = QStringLiteral("hu"));
+	Q_INVOKABLE void retranslate(const QString &language = QStringLiteral("hu"));
 
-    bool fullScreenHelper() const;
-    void setFullScreenHelper(bool newFullScreenHelper);
+	bool fullScreenHelper() const;
+	void setFullScreenHelper(bool newFullScreenHelper);
 
-    QQuickItem *mainStack() const;
-    void setMainStack(QQuickItem *newMainStack);
+	QQuickItem *mainStack() const;
+	void setMainStack(QQuickItem *newMainStack);
 
-    QQuickWindow *mainWindow() const;
-    void setMainWindow(QQuickWindow *newMainWindow);
+	QQuickWindow *mainWindow() const;
+	void setMainWindow(QQuickWindow *newMainWindow);
 
-    qreal safeMarginLeft() const;
-    void setSafeMarginLeft(qreal newSafeMarginLeft);
+	qreal safeMarginLeft() const;
+	void setSafeMarginLeft(qreal newSafeMarginLeft);
 
-    qreal safeMarginRight() const;
-    void setSafeMarginRight(qreal newSafeMarginRight);
+	qreal safeMarginRight() const;
+	void setSafeMarginRight(qreal newSafeMarginRight);
 
-    qreal safeMarginTop() const;
-    void setSafeMarginTop(qreal newSafeMarginTop);
+	qreal safeMarginTop() const;
+	void setSafeMarginTop(qreal newSafeMarginTop);
 
-    qreal safeMarginBottom() const;
-    void setSafeMarginBottom(qreal newSafeMarginBottom);
+	qreal safeMarginBottom() const;
+	void setSafeMarginBottom(qreal newSafeMarginBottom);
 
 public slots:
-    virtual void onApplicationStarted() = 0;
+	virtual void onApplicationStarted() = 0;
 
 signals:
-    void fullScreenHelperChanged();
-    void mainStackChanged();
-    void mainWindowChanged();
-    void safeMarginLeftChanged();
-    void safeMarginRightChanged();
-    void safeMarginTopChanged();
-    void safeMarginBottomChanged();
+	void fullScreenHelperChanged();
+	void mainStackChanged();
+	void mainWindowChanged();
+	void safeMarginLeftChanged();
+	void safeMarginRightChanged();
+	void safeMarginTopChanged();
+	void safeMarginBottomChanged();
 
 protected:
-    virtual bool loadMainQml();
-    virtual bool loadResources() = 0;
-    virtual void registerQmlTypes() = 0;
-    virtual void setAppContextProperty() = 0;
+	virtual bool loadMainQml();
+	virtual bool loadResources() = 0;
+	virtual void registerQmlTypes() = 0;
+	virtual void setAppContextProperty() = 0;
 
-    void loadFonts(const QStringList &fontList);
-    void loadQaterial();
+	void loadFonts(const QStringList &fontList);
+	void loadQaterial();
+
+#ifdef Q_OS_WASM
+	void enableTabCloseConfirmation(bool enable);
+	void wasmOpen(const QString &accept, std::function<void(const QByteArray &, const QString &)> func);
+	void wasmSave(const QByteArray &content, const QString &name);
+#endif
+
 
 protected:
-    static const int m_versionMajor;
-    static const int m_versionMinor;
-    static const int m_versionBuild;
-    static const char* m_version;
+	static const int m_versionMajor;
+	static const int m_versionMinor;
+	static const int m_versionBuild;
+	static const char* m_version;
 
-    static AbstractApplication *m_instance;
-    static const bool m_debug;
+	static AbstractApplication *m_instance;
+	static const bool m_debug;
 
-    QGuiApplication *const m_application;
-    std::unique_ptr<QQmlApplicationEngine> m_engine;
-    std::unique_ptr<Utils> m_utils;
-    std::unique_ptr<QTranslator> m_translator;
+	QGuiApplication *const m_application;
+	std::unique_ptr<QQmlApplicationEngine> m_engine;
+	std::unique_ptr<Utils> m_utils;
+	std::unique_ptr<QTranslator> m_translator;
 
-    QQuickItem *m_mainStack = nullptr;
-    QQuickWindow *m_mainWindow = nullptr;
-    bool m_mainWindowClosable = false;
+	QQuickItem *m_mainStack = nullptr;
+	QQuickWindow *m_mainWindow = nullptr;
+	bool m_mainWindowClosable = false;
 
-    qreal m_safeMarginLeft = 0;
-    qreal m_safeMarginRight = 0;
-    qreal m_safeMarginTop = 0;
-    qreal m_safeMarginBottom = 0;
+	qreal m_safeMarginLeft = 0;
+	qreal m_safeMarginRight = 0;
+	qreal m_safeMarginTop = 0;
+	qreal m_safeMarginBottom = 0;
 
 private:
-    void _message(const QString &text, const QString &title, const QString &type) const;
+	void _message(const QString &text, const QString &title, const QString &type) const;
 
+#ifdef Q_OS_WASM
+	bool m_closeConfirm = false;
+#endif
 };
 
 #endif // ABSTRACTAPPLICATION_H

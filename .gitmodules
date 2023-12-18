@@ -13,3 +13,6 @@
 [submodule "lib/qsyncable"]
 	path = lib/qsyncable
 	url = git@github.com:valaczka/qsyncable.git
+[submodule "lib/QtXlsxWriter"]
+	path = lib/QtXlsxWriter
+	url = https://github.com/valaczka/QtXlsxWriter.git

@@ -15,6 +15,13 @@ QPage {
 	appBar.rightComponent: Qaterial.AppBarButton
 	{
 		icon.source: Qaterial.Icons.dotsVertical
+		onClicked: menu.open()
+
+		QMenu {
+			id: menu
+
+			QMenuItem { action: actionAbout }
+		}
 	}
 
 
@@ -22,7 +29,9 @@ QPage {
 		anchors.centerIn: parent
 
 		QButton {
-			text: "New"
+			anchors.horizontalCenter: parent.horizontalCenter
+			text: qsTr("Létrehozás")
+			icon.source: Qaterial.Icons.plus
 			enabled: !App.database
 			onClicked: {
 				Qaterial.DialogManager.showTextFieldDialog({
@@ -38,19 +47,33 @@ QPage {
 		}
 
 		QButton {
-			text: "Open"
+			anchors.horizontalCenter: parent.horizontalCenter
+			text: qsTr("Megnyitás")
+			icon.source: Qaterial.Icons.folderOpen
 			enabled: !App.database
 			onClicked: {
 				App.dbOpen()
 			}
 		}
-
-		QButton {
-			text: "Save"
-			enabled: App.database
-			onClicked: App.dbSave()
-		}
 	}
 
+
+	Action {
+		id: actionAbout
+		text: qsTr("Névjegy")
+		icon.source: Qaterial.Icons.information
+		onTriggered: {
+			Qaterial.DialogManager.showDialog(
+						{
+							text: qsTr("Verzió: %1\n(c) 2023 Valaczka János Pál").arg(App.version),
+							title: control.title,
+							iconSource: "qrc:/piar.png",
+							iconColor: "transparent",
+							iconFill: false,
+							iconSize: Qaterial.Style.roundIcon.size,
+							standardButtons: DialogButtonBox.Close
+						})
+		}
+	}
 
 }

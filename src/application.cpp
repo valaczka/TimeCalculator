@@ -26,6 +26,8 @@
 
 #include "application.h"
 #include "Logger.h"
+#include "qtextdocument.h"
+#include <QPdfWriter>
 #include "utils_.h"
 
 
@@ -35,7 +37,7 @@
  */
 
 Application::Application(QGuiApplication *app)
-    : AbstractApplication(app)
+	: AbstractApplication(app)
 {
 
 }
@@ -58,17 +60,17 @@ Application::~Application()
 
 void Application::dbOpen(const QString &)
 {
-    if (m_database)
-        return messageError(tr("Már meg van nyitva egy adatbázis!"));
+	if (m_database)
+		return messageError(tr("Már meg van nyitva egy adatbázis!"));
 
-    if (QFile::exists("/tmp/_test.json")) {
-        const auto &json = Utils::fileToJsonObject("/tmp/_test.json");
-        if (!json) {
-            messageError(tr("Érvénytelen fájl"));
-        } else {
-            loadFromJson(*json);
-        }
-    }
+	if (QFile::exists("/tmp/_test.json")) {
+		const auto &json = Utils::fileToJsonObject("/tmp/_test.json");
+		if (!json) {
+			messageError(tr("Érvénytelen fájl"));
+		} else {
+			loadFromJson(*json);
+		}
+	}
 }
 
 
@@ -79,18 +81,39 @@ void Application::dbOpen(const QString &)
 
 void Application::dbSave()
 {
-    if (!m_database)
-        return messageError(tr("Nincs megnyitva adatbázis!"));
+	if (!m_database)
+		return messageError(tr("Nincs megnyitva adatbázis!"));
 
-    const auto &json = m_database->toJson();
+	const auto &json = m_database->toJson();
 
-    if (json) {
-        if (Utils::jsonObjectToFile(*json, "/tmp/_test.json")) {
-            snack(tr("Mentés sikerült"));
-            m_database->setModified(false);
-        } else
-            messageError(tr("Sikertelen mentés"));
-    }
+	if (json) {
+		if (Utils::jsonObjectToFile(*json, "/tmp/_test.json")) {
+			snack(tr("Mentés sikerült"));
+			m_database->setModified(false);
+		} else
+			messageError(tr("Sikertelen mentés"));
+	}
+}
+
+
+
+/**
+ * @brief Application::dbPrint
+ */
+
+void Application::dbPrint()
+{
+	if (!m_database)
+		return messageError(tr("Nincs megnyitva adatbázis!"));
+
+	const QByteArray &content = toTextDocument();
+
+	QFile f("/tmp/out.pdf");
+	f.open(QIODevice::WriteOnly);
+	f.write(content);
+	f.close();
+
+	snack(tr("PDF elkészült"));
 }
 
 
@@ -102,23 +125,23 @@ void Application::dbSave()
 
 bool Application::dbCreate(const QString &title)
 {
-    if (m_database) {
-        messageError(tr("Már meg van nyitva egy adatbázis!"));
-        return false;
-    }
+	if (m_database) {
+		messageError(tr("Már meg van nyitva egy adatbázis!"));
+		return false;
+	}
 
-    std::unique_ptr<Database> ptr(new Database);
+	std::unique_ptr<Database> ptr(new Database);
 
-    if (ptr->prepare(ptr->databaseName())) {
-        ptr->setTitle(title);
-        ptr->sync();
-        ptr->setModified(true);
-        setDatabase(ptr);
-        stackPushPage(QStringLiteral("PageDatabase.qml"));
-        return true;
-    }
+	if (ptr->prepare(ptr->databaseName())) {
+		ptr->setTitle(title);
+		ptr->sync();
+		ptr->setModified(true);
+		setDatabase(ptr);
+		stackPushPage(QStringLiteral("PageDatabase.qml"));
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 
@@ -129,10 +152,10 @@ bool Application::dbCreate(const QString &title)
 
 void Application::dbClose()
 {
-    if (m_database) {
-        std::unique_ptr<Database> db;
-        setDatabase(db);
-    }
+	if (m_database) {
+		std::unique_ptr<Database> db;
+		setDatabase(db);
+	}
 }
 
 
@@ -146,13 +169,13 @@ void Application::dbClose()
 
 int Application::yearsBetween(const QDate &date1, const QDate &date2)
 {
-    QDate d2 = date2.addDays(1);
-    QDate d(d2.year(), date1.month(), date1.day());
+	QDate d2 = date2.addDays(1);
+	QDate d(d2.year(), date1.month(), date1.day());
 
-    if (d2 < d)
-        return d2.year()-1-date1.year();
-    else
-        return d2.year()-date1.year();
+	if (d2 < d)
+		return d2.year()-1-date1.year();
+	else
+		return d2.year()-date1.year();
 }
 
 
@@ -165,15 +188,15 @@ int Application::yearsBetween(const QDate &date1, const QDate &date2)
 
 int Application::daysBetween(const QDate &date1, const QDate &date2)
 {
-    QDate d2 = date2.addDays(1);
-    QDate d(d2.year(), date1.month(), date1.day());
+	QDate d2 = date2.addDays(1);
+	QDate d(d2.year(), date1.month(), date1.day());
 
-    if (d2 < d) {
-        QDate from(d2.year()-1, date1.month(), date1.day());
-        return from.daysTo(d2);
-    } else {
-        return d.daysTo(d2);
-    }
+	if (d2 < d) {
+		QDate from(d2.year()-1, date1.month(), date1.day());
+		return from.daysTo(d2);
+	} else {
+		return d.daysTo(d2);
+	}
 }
 
 
@@ -186,9 +209,9 @@ int Application::daysBetween(const QDate &date1, const QDate &date2)
 
 void Application::onApplicationStarted()
 {
-    LOG_CINFO("app") << "Az alkalmazás sikeresen elindult.";
+	LOG_CINFO("app") << "Az alkalmazás sikeresen elindult.";
 
-        stackPushPage(QStringLiteral("PageStart.qml"));
+	stackPushPage(QStringLiteral("PageStart.qml"));
 }
 
 
@@ -196,12 +219,12 @@ void Application::onApplicationStarted()
 
 bool Application::loadResources()
 {
-    loadFonts({
-        QStringLiteral(":/NotoSans-Italic-VariableFont_wdth,wght.ttf"),
-        QStringLiteral(":/NotoSans-VariableFont_wdth,wght.ttf"),
-    });
+	loadFonts({
+				  QStringLiteral(":/NotoSans-Italic-VariableFont_wdth,wght.ttf"),
+				  QStringLiteral(":/NotoSans-VariableFont_wdth,wght.ttf"),
+			  });
 
-    return true;
+	return true;
 }
 
 
@@ -212,16 +235,16 @@ bool Application::loadResources()
 
 void Application::registerQmlTypes()
 {
-    LOG_CTRACE("app") << "Register QML types";
+	LOG_CTRACE("app") << "Register QML types";
 
-    qmlRegisterUncreatableType<Application>("TimeCalculator", 1, 0, "Application", "Application is uncreatable");
-    qmlRegisterUncreatableType<Utils>("TimeCalculator", 1, 0, "Utils", "Utils is uncreatable");
+	qmlRegisterUncreatableType<Application>("TimeCalculator", 1, 0, "Application", "Application is uncreatable");
+	qmlRegisterUncreatableType<Utils>("TimeCalculator", 1, 0, "Utils", "Utils is uncreatable");
 
-    //qmlRegisterType<QSJsonListModel>("QSyncable", 1, 0, "QSJsonListModel");
-    //qmlRegisterType<QSListModel>("QSyncable", 1, 0, "QSListModel");
+	//qmlRegisterType<QSJsonListModel>("QSyncable", 1, 0, "QSJsonListModel");
+	//qmlRegisterType<QSListModel>("QSyncable", 1, 0, "QSListModel");
 
 
-    //qmlRegisterType<BaseMap>("CallOfSuli", 1, 0, "BaseMap");
+	//qmlRegisterType<BaseMap>("CallOfSuli", 1, 0, "BaseMap");
 }
 
 
@@ -231,7 +254,7 @@ void Application::registerQmlTypes()
 
 void Application::setAppContextProperty()
 {
-    m_engine->rootContext()->setContextProperty("App", this);
+	m_engine->rootContext()->setContextProperty("App", this);
 }
 
 
@@ -244,18 +267,62 @@ void Application::setAppContextProperty()
 
 bool Application::loadFromJson(const QJsonObject &data)
 {
-    std::unique_ptr<Database> db = nullptr;
+	std::unique_ptr<Database> db = nullptr;
 
-    db.reset(Database::fromJson(data));
-    if (!db) {
-        messageError(tr("Érvénytelen adat"));
-        return false;
-    }
+	db.reset(Database::fromJson(data));
+	if (!db) {
+		messageError(tr("Érvénytelen adat"));
+		return false;
+	}
 
-    setDatabase(db);
-    stackPushPage(QStringLiteral("PageDatabase.qml"));
+	setDatabase(db);
+	stackPushPage(QStringLiteral("PageDatabase.qml"));
 
-    return true;
+	return true;
+}
+
+
+
+
+/**
+ * @brief Application::toTextDocument
+ * @param markdown
+ */
+
+QByteArray Application::toTextDocument() const
+{
+	QTextDocument document;
+
+	QFont font(QStringLiteral("Noto Sans"), 9);
+
+	document.setDefaultFont(font);
+	document.setMarkdown(m_database->toMarkdown());
+
+	/*QImage img = QImage::fromData(Utils::fileContent(":/piar.png").value_or(QByteArray{}));
+	document.addResource(QTextDocument::ImageResource, QUrl("imgdata://piar.png"), QVariant(img));*/
+
+
+	QByteArray content;
+	QBuffer buffer(&content);
+	buffer.open(QIODevice::WriteOnly);
+
+	QPdfWriter pdf(&buffer);
+	pdf.setCreator("Valaczka János Pál");
+	QPageLayout layout = pdf.pageLayout();
+	layout.setPageSize(QPageSize::A4);
+	layout.setMargins(QMarginsF(5, 5, 5, 5));
+	layout.setMinimumMargins(QMarginsF(5, 5, 5, 5));
+	layout.setMode(QPageLayout::FullPageMode);
+	pdf.setPageLayout(layout);
+
+	pdf.setTitle(QStringLiteral("Gyakorlati idő kalkulátor – ").append(m_database->title()));
+	pdf.setCreator(QStringLiteral("TimeCalculator"));
+
+	document.print(&pdf);
+
+	buffer.close();
+
+	return content;
 }
 
 
@@ -268,7 +335,7 @@ bool Application::loadFromJson(const QJsonObject &data)
 
 Database*Application::database() const
 {
-    return m_database.get();
+	return m_database.get();
 }
 
 
@@ -279,8 +346,8 @@ Database*Application::database() const
 
 void Application::setDatabase(Database *newDatabase)
 {
-    std::unique_ptr<Database> ptr(newDatabase);
-    setDatabase(ptr);
+	std::unique_ptr<Database> ptr(newDatabase);
+	setDatabase(ptr);
 }
 
 
@@ -291,8 +358,8 @@ void Application::setDatabase(Database *newDatabase)
 
 void Application::setDatabase(std::unique_ptr<Database> &newDatabase)
 {
-    if (m_database == newDatabase)
-        return;
-    m_database = std::move(newDatabase);
-    emit databaseChanged();
+	if (m_database == newDatabase)
+		return;
+	m_database = std::move(newDatabase);
+	emit databaseChanged();
 }

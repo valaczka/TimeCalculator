@@ -42,83 +42,83 @@
 
 class Utils : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit Utils(QObject *parent = nullptr);
-    virtual ~Utils();
+	explicit Utils(QObject *parent = nullptr);
+	virtual ~Utils();
 
-    static std::optional<QByteArray> fileContent(const QString &filename);
-    Q_INVOKABLE static QByteArray fileContentRead(const QString &filename) {
-        return fileContent(filename).value_or(QByteArray{});
-    }
+	static std::optional<QByteArray> fileContent(const QString &filename);
+	Q_INVOKABLE static QByteArray fileContentRead(const QString &filename) {
+		return fileContent(filename).value_or(QByteArray{});
+	}
 
-    Q_INVOKABLE static QString fileBaseName(const QString &filename);
-    Q_INVOKABLE static bool fileExists(const QUrl &file);
+	Q_INVOKABLE static QString fileBaseName(const QString &filename);
+	Q_INVOKABLE static bool fileExists(const QUrl &file);
 
-    Q_INVOKABLE static bool jsonDocumentToFile(const QJsonDocument &doc, const QString &filename,
-                                               const QJsonDocument::JsonFormat &format = QJsonDocument::Indented);
-    Q_INVOKABLE static bool jsonObjectToFile(const QJsonObject &object, const QString &filename,
-                                             const QJsonDocument::JsonFormat &format = QJsonDocument::Indented);
-    Q_INVOKABLE static bool jsonArrayToFile(const QJsonArray &array, const QString &filename,
-                                            const QJsonDocument::JsonFormat &format = QJsonDocument::Indented);
+	Q_INVOKABLE static bool jsonDocumentToFile(const QJsonDocument &doc, const QString &filename,
+											   const QJsonDocument::JsonFormat &format = QJsonDocument::Indented);
+	Q_INVOKABLE static bool jsonObjectToFile(const QJsonObject &object, const QString &filename,
+											 const QJsonDocument::JsonFormat &format = QJsonDocument::Indented);
+	Q_INVOKABLE static bool jsonArrayToFile(const QJsonArray &array, const QString &filename,
+											const QJsonDocument::JsonFormat &format = QJsonDocument::Indented);
 
-    static std::optional<QJsonDocument> byteArrayToJsonDocument(const QByteArray &data);
-    static std::optional<QJsonObject> byteArrayToJsonObject(const QByteArray &data);
-    static std::optional<QJsonArray> byteArrayToJsonArray(const QByteArray &data);
+	static std::optional<QJsonDocument> byteArrayToJsonDocument(const QByteArray &data);
+	static std::optional<QJsonObject> byteArrayToJsonObject(const QByteArray &data);
+	static std::optional<QJsonArray> byteArrayToJsonArray(const QByteArray &data);
 
-    static std::optional<QJsonDocument> fileToJsonDocument(const QString &filename);
-    static std::optional<QJsonObject> fileToJsonObject(const QString &filename);
-    static std::optional<QJsonArray> fileToJsonArray(const QString &filename);
+	static std::optional<QJsonDocument> fileToJsonDocument(const QString &filename);
+	static std::optional<QJsonObject> fileToJsonObject(const QString &filename);
+	static std::optional<QJsonArray> fileToJsonArray(const QString &filename);
 
-    Q_INVOKABLE static QColor colorSetAlpha(QColor color, const qreal &alpha);
+	Q_INVOKABLE static QColor colorSetAlpha(QColor color, const qreal &alpha);
 
-    Q_INVOKABLE static QString formatMSecs(const int &msec, const int &decimals = 0, const bool &withMinute = true);
+	Q_INVOKABLE static QString formatMSecs(const int &msec, const int &decimals = 0, const bool &withMinute = true);
 
-    Q_INVOKABLE static void openUrl(const QUrl &url);
+	Q_INVOKABLE static void openUrl(const QUrl &url);
 
-    Q_INVOKABLE static QString standardPath(const QString &path = "");
-    Q_INVOKABLE static QString genericDataPath(const QString &path = "");
+	Q_INVOKABLE static QString standardPath(const QString &path = "");
+	Q_INVOKABLE static QString genericDataPath(const QString &path = "");
 
-    Q_INVOKABLE static QByteArray generateRandomString(quint8 length);
-    Q_INVOKABLE static QByteArray generateRandomString(quint8 length, const char *characters);
+	Q_INVOKABLE static QByteArray generateRandomString(quint8 length);
+	Q_INVOKABLE static QByteArray generateRandomString(quint8 length, const char *characters);
 
-    Q_INVOKABLE static QVariant settingsGet(const QString &key, const QVariant &defaultValue = QVariant());
-    Q_INVOKABLE static void settingsSet(const QString &key, const QVariant &value);
-    Q_INVOKABLE static void settingsClear(const QString &key);
+	Q_INVOKABLE static QVariant settingsGet(const QString &key, const QVariant &defaultValue = QVariant());
+	Q_INVOKABLE static void settingsSet(const QString &key, const QVariant &value);
+	Q_INVOKABLE static void settingsClear(const QString &key);
 
-    static const QModelIndex& noParent();
+	static const QModelIndex& noParent();
 
-    template<typename QEnum>
-    static std::string enumToString(const QEnum value)
-    {
-        return std::string(QMetaEnum::fromType<QEnum>().valueToKey(value));
-    }
+	template<typename QEnum>
+	static std::string enumToString(const QEnum value)
+	{
+		return std::string(QMetaEnum::fromType<QEnum>().valueToKey(value));
+	}
 
-    template<typename QEnum>
-    static QString enumToQString(const QEnum value)
-    {
-        return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
-    }
+	template<typename QEnum>
+	static QString enumToQString(const QEnum value)
+	{
+		return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
+	}
 
-    static QStringList getRolesFromObject(const QMetaObject *object);
-    static void patchSListModel(QSListModel *model, const QVariantList &data, const QString &keyField);
+	static QStringList getRolesFromObject(const QMetaObject *object);
+	static void patchSListModel(QSListModel *model, const QVariantList &data, const QString &keyField);
 
-    Q_INVOKABLE static void setClipboardText(const QString &text);
-    Q_INVOKABLE static QString clipboardText();
+	Q_INVOKABLE static void setClipboardText(const QString &text);
+	Q_INVOKABLE static QString clipboardText();
 
 #ifdef CLIENT_UTILS
-    Q_INVOKABLE void checkStoragePermissions();
-    Q_INVOKABLE void checkMediaPermissions();
+	Q_INVOKABLE void checkStoragePermissions();
+	Q_INVOKABLE void checkMediaPermissions();
 #endif
 
-    Q_INVOKABLE static quint32 versionCode(const int &major, const int &minor);
+	Q_INVOKABLE static quint32 versionCode(const int &major, const int &minor);
 
 signals:
-    void storagePermissionsGranted();
-    void storagePermissionsDenied();
-    void mediaPermissionsGranted();
-    void mediaPermissionsDenied();
+	void storagePermissionsGranted();
+	void storagePermissionsDenied();
+	void mediaPermissionsGranted();
+	void mediaPermissionsDenied();
 };
 
 

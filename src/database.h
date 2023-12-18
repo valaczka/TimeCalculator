@@ -32,61 +32,65 @@
 
 class Database : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
-    Q_PROPERTY(QString databaseName READ databaseName WRITE setDatabaseName NOTIFY databaseNameChanged FINAL)
-    Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
-    Q_PROPERTY(QSListModel* model READ model CONSTANT FINAL)
-    Q_PROPERTY(QVariantMap calculation READ calculation WRITE setCalculation NOTIFY calculationChanged FINAL)
-    Q_PROPERTY(bool modified READ modified WRITE setModified NOTIFY modifiedChanged FINAL)
+	Q_PROPERTY(QString databaseName READ databaseName WRITE setDatabaseName NOTIFY databaseNameChanged FINAL)
+	Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
+	Q_PROPERTY(QSListModel* model READ model CONSTANT FINAL)
+	Q_PROPERTY(QVariantMap calculation READ calculation WRITE setCalculation NOTIFY calculationChanged FINAL)
+	Q_PROPERTY(bool modified READ modified WRITE setModified NOTIFY modifiedChanged FINAL)
 
 public:
-    explicit Database(QObject *parent = nullptr);
-    virtual ~Database();
+	explicit Database(QObject *parent = nullptr);
+	virtual ~Database();
 
-    static bool prepare(const QString &databaseName);
-    std::optional<QJsonObject> toJson() const;
-    static Database *fromJson(const QString &databaseName, const QJsonObject &json);
-    static Database *fromJson(const QJsonObject &json) { return fromJson(QStringLiteral(""), json); }
+	static bool prepare(const QString &databaseName);
+	std::optional<QJsonObject> toJson() const;
+	static Database *fromJson(const QString &databaseName, const QJsonObject &json);
+	static Database *fromJson(const QJsonObject &json) { return fromJson(QStringLiteral(""), json); }
 
-    Q_INVOKABLE int jobAdd(const QJsonObject &data);
-    Q_INVOKABLE bool jobEdit(const int &id, const QJsonObject &data);
+	Q_INVOKABLE int jobAdd(const QJsonObject &data);
+	Q_INVOKABLE bool jobEdit(const int &id, const QJsonObject &data);
+	Q_INVOKABLE bool jobDelete(const int &id);
 
-    Q_INVOKABLE QVariantMap calculationGet(const int &id) const;
-    Q_INVOKABLE bool calculationEdit(const int &id, const QJsonObject &data);
+	Q_INVOKABLE QVariantMap calculationGet(const int &id) const;
+	Q_INVOKABLE bool calculationEdit(const int &id, const QJsonObject &data);
 
-    Q_INVOKABLE void sync();
+	Q_INVOKABLE void sync();
 
-    QString databaseName() const;
-    void setDatabaseName(const QString &newDatabaseName);
 
-    QString title() const;
-    void setTitle(const QString &newTitle);
+	Q_INVOKABLE QString toMarkdown() const;
 
-    QSListModel* model() const;
+	QString databaseName() const;
+	void setDatabaseName(const QString &newDatabaseName);
 
-    QVariantMap calculation() const;
-    void setCalculation(const QVariantMap &newCalculation);
+	QString title() const;
+	void setTitle(const QString &newTitle);
 
-    bool modified() const;
-    void setModified(bool newModified);
+	QSListModel* model() const;
+
+	QVariantMap calculation() const;
+	void setCalculation(const QVariantMap &newCalculation);
+
+	bool modified() const;
+	void setModified(bool newModified);
 
 signals:
-    void databaseNameChanged();
-    void titleChanged();
-    void calculationChanged();
-    void modifiedChanged();
+	void databaseNameChanged();
+	void titleChanged();
+	void calculationChanged();
+	void modifiedChanged();
 
 private:
-    bool calculationAddFromJson(const QJsonObject &data);
-    QVariantList sqlMainView(QVariantMap *dest) const;
+	bool calculationAddFromJson(const QJsonObject &data);
+	QVariantList sqlMainView(QVariantMap *dest) const;
 
-    QString m_databaseName = QStringLiteral("mainDb");
-    QString m_title;
-    bool m_modified = false;
+	QString m_databaseName = QStringLiteral("mainDb");
+	QString m_title;
+	bool m_modified = false;
 
-    std::unique_ptr<QSListModel> m_model;
-    QVariantMap m_calculation;
+	std::unique_ptr<QSListModel> m_model;
+	QVariantMap m_calculation;
 };
 
 #endif // DATABASE_H

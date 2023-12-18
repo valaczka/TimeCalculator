@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>NotoSans-Italic-VariableFont_wdth,wght.ttf</file>
         <file>NotoSans-VariableFont_wdth,wght.ttf</file>
+        <file>piar.png</file>
     </qresource>
 </RCC>

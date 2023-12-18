@@ -30,6 +30,15 @@ android|ios|wasm {
 }
 
 
+# QtXlsxWriter
+
+INCLUDEPATH += $$PWD/QtXlsxWriter/src/xlsx
+
+android: LIBS += -lQtXlsxWriter_$${QT_ARCH}
+else: LIBS += -lQtXlsxWriter
+
+
+
 # QSyncable
 
 include(qsyncable.pri)

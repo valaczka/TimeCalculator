@@ -32,7 +32,7 @@
 class DesktopApplication : public Application
 {
 public:
-    DesktopApplication(QGuiApplication *app);
+	DesktopApplication(QGuiApplication *app);
 };
 
 #endif // DESKTOPAPPLICATION_H

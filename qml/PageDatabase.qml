@@ -12,7 +12,6 @@ QPage {
 
 	title: App.database ? App.database.title : "???"
 
-	appBar.backButtonVisible: false
 	appBar.rightComponent: Qaterial.AppBarButton
 	{
 		icon.source: Qaterial.Icons.dotsVertical
@@ -24,6 +23,7 @@ QPage {
 			QMenuItem { action: actionRename }
 			Qaterial.MenuSeparator {}
 			QMenuItem { action: actionSave }
+			QMenuItem { action: _actionPrint }
 			QMenuItem { action: actionClose }
 		}
 	}
@@ -67,6 +67,17 @@ QPage {
 		onTriggered: App.stackPop()
 	}
 
+	Action {
+		id: _actionPrint
+		text: qsTr("PDF")
+		icon.source: Qaterial.Icons.filePdf
+		enabled: App.database
+		shortcut: "Ctrl+P"
+		onTriggered: {
+			App.dbPrint()
+		}
+	}
+
 	/*
 	Action {
 		id: actionAbout
@@ -94,18 +105,53 @@ QPage {
 		horizontalPadding: 0
 		topPadding: 0
 		bottomPadding: 0
-		spacing: 10
+		spacing: 5
 
 		refreshEnabled: App.database
 		onRefreshRequest: App.database.sync()
 
-		Qaterial.LabelHeadline6 {
-			visible: App.database
-			anchors.horizontalCenter: parent.horizontalCenter
+		Qaterial.IconLabel {
+			font: Qaterial.Style.textTheme.headline6
+			color: Qaterial.Style.iconColor()
+			icon.source: Qaterial.Icons.briefcaseVariant
+			anchors.left: _view.left
 			width: _view.width
-			text: App.database ? qsTr("Munkaviszony: %1 év %2 nap\n").arg(App.database.calculation.jobYears).arg(App.database.calculation.jobDays)
-								 +qsTr("Szakmai gyakorlat: %1 év %2 nap\n").arg(App.database.calculation.practiceYears).arg(App.database.calculation.practiceDays)
-								 +qsTr("Jubileumi jutalom: %1 év %2 nap").arg(App.database.calculation.prestigeYears).arg(App.database.calculation.prestigeDays)
+			horizontalAlignment: Qt.AlignLeft
+			text: App.database ? qsTr("Munkaviszony: %1 év %2 nap\n").arg(App.database.calculation.jobYears).arg(App.database.calculation.jobDays) : ""
+		}
+
+		Qaterial.IconLabel {
+			font: Qaterial.Style.textTheme.headline6
+			color: Qaterial.Style.iconColor()
+			icon.source: Qaterial.Icons.hammerWrench
+			anchors.left: _view.left
+			width: _view.width
+			horizontalAlignment: Qt.AlignLeft
+			text: App.database ? qsTr("Szakmai gyakorlat: %1 év %2 nap\n").arg(App.database.calculation.practiceYears).arg(App.database.calculation.practiceDays) : ""
+		}
+
+		Qaterial.IconLabel {
+			font: Qaterial.Style.textTheme.headline6
+			color: Qaterial.Style.iconColor()
+			icon.source: Qaterial.Icons.medal
+			anchors.left: _view.left
+			width: _view.width
+			horizontalAlignment: Qt.AlignLeft
+			text: App.database ? qsTr("Jubileumi jutalom: %1 év %2 nap").arg(App.database.calculation.prestigeYears).arg(App.database.calculation.prestigeDays) : ""
+		}
+
+		Qaterial.IconLabel {
+			font: Qaterial.Style.textTheme.headline6
+			color: Qaterial.Style.accentColor
+			icon.source: Qaterial.Icons.calendarStar
+			anchors.left: _view.left
+			width: _view.width
+			horizontalAlignment: Qt.AlignLeft
+			text: App.database ? qsTr("Következő jubileumi jutalom időpontja: %1 (%2 év)")
+								 .arg(App.database.calculation.nextPrestigeYears > 0 ?
+										  App.database.calculation.nextPrestige.toLocaleDateString(Qt.locale(), "yyyy. MMMM d.")
+										: "-")
+								 .arg(App.database.calculation.nextPrestigeYears > 0 ? App.database.calculation.nextPrestigeYears : "-")
 							   : ""
 		}
 
@@ -131,7 +177,8 @@ QPage {
 
 				leftSourceComponent: Qaterial.Icon {
 					anchors.verticalCenter: parent.verticalCenter
-					icon: model.overlap ? Qaterial.Icons.alert : Qaterial.Icons.checkAll
+					icon: model.overlap ? Qaterial.Icons.alert : Qaterial.Icons.check
+					color: model.overlap ? Qaterial.Style.accentColor : Qaterial.Colors.green400
 				}
 
 
@@ -156,6 +203,7 @@ QPage {
 							mode: model.jobMode
 							years: model.jobYears
 							days: model.jobDays
+							icon.source: Qaterial.Icons.briefcaseVariant
 						}
 
 						CalculationLabel {
@@ -163,6 +211,7 @@ QPage {
 							mode: model.practiceMode
 							years: model.practiceYears
 							days: model.practiceDays
+							icon.source: Qaterial.Icons.hammerWrench
 						}
 
 						CalculationLabel {
@@ -170,6 +219,7 @@ QPage {
 							mode: model.prestigeMode
 							years: model.prestigeYears
 							days: model.prestigeDays
+							icon.source: Qaterial.Icons.medal
 						}
 					}
 

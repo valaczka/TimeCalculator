@@ -32,16 +32,12 @@
 class OnlineApplication : public Application
 {
 public:
-    OnlineApplication(QGuiApplication *app);
-    virtual ~OnlineApplication() {}
+	OnlineApplication(QGuiApplication *app);
+	virtual ~OnlineApplication() {}
 
-    Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral("*")) override;
-    Q_INVOKABLE virtual void dbSave() override;
-
-private:
-    void enableTabCloseConfirmation(bool enable);
-
-    bool m_closeConfirm = false;
+	Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral("*")) override;
+	Q_INVOKABLE virtual void dbSave() override;
+	Q_INVOKABLE virtual void dbPrint() override;
 };
 
 #endif // ONLINEAPPLICATION_H

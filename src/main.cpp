@@ -9,16 +9,16 @@
 
 int main(int argc, char *argv[])
 {
-    AbstractApplication::initialize();
-    QGuiApplication qapp(argc, argv);
+	AbstractApplication::initialize();
+	QGuiApplication qapp(argc, argv);
 
 #ifdef Q_OS_WASM
-    OnlineApplication app(&qapp);
+	OnlineApplication app(&qapp);
 #else
-    DesktopApplication app(&qapp);
+	DesktopApplication app(&qapp);
 #endif
 
-    app.initialize();
-    return app.run();
+	app.initialize();
+	return app.run();
 
 }

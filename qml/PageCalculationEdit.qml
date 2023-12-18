@@ -21,6 +21,7 @@ QPage {
 	{
 		action: _actionSave
 		display: AbstractButton.IconOnly
+
 	}
 
 	ListModel {
@@ -61,7 +62,7 @@ QPage {
 			}
 
 			QFormSection {
-				icon.source: Qaterial.Icons.compass
+				icon.source: Qaterial.Icons.briefcaseVariant
 				text: qsTr("Munkaviszony")
 			}
 
@@ -98,7 +99,7 @@ QPage {
 
 
 			QFormSection {
-				icon.source: Qaterial.Icons.compass
+				icon.source: Qaterial.Icons.hammerWrench
 				text: qsTr("Szakmai gyakorlat")
 			}
 
@@ -134,7 +135,7 @@ QPage {
 
 
 			QFormSection {
-				icon.source: Qaterial.Icons.compass
+				icon.source: Qaterial.Icons.medal
 				text: qsTr("Jubileumi jutalom")
 			}
 
@@ -178,10 +179,12 @@ QPage {
 	}
 
 
+
+
 	Action {
 		id: _actionSave
-		text: qsTr("Mentés")
-		icon.source: Qaterial.Icons.contentSave
+		text: qsTr("Kész")
+		icon.source: Qaterial.Icons.checkBold
 		enabled: _form.modified
 		onTriggered:
 		{
