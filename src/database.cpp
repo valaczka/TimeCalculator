@@ -353,6 +353,53 @@ int Database::jobAdd(const QJsonObject &data)
 
 
 /**
+ * @brief Database::jobAddBatch
+ * @param data
+ * @return
+ */
+
+bool Database::jobAddBatch(const QVector<QVariantMap> &data)
+{
+	auto db = QSqlDatabase::database(m_databaseName);
+	if (!db.isOpen()) {
+		LOG_CERROR("app") << "Database isn't opened";
+		return false;
+	}
+
+	db.transaction();
+
+
+	for (const QVariantMap &m : data) {
+		QueryBuilder q(db);
+
+		q.addQuery("INSERT INTO job(")
+				.setFieldPlaceholder()
+				.addQuery(") VALUES (")
+				.setValuePlaceholder()
+				.addQuery(")");
+
+		for (const QString &s : m.keys()) {
+			q.addField(s.toUtf8(), m.value(s));
+		}
+
+		if (!q.exec()) {
+			LOG_CERROR("app") << "Import error:" << m;
+			db.rollback();
+			return false;
+		}
+	}
+
+	db.commit();
+
+	setModified(true);
+
+	sync();
+
+	return true;
+}
+
+
+/**
  * @brief Database::jobEdit
  * @param id
  * @param data
@@ -555,6 +602,51 @@ bool Database::calculationEdit(const int &id, const QJsonObject &data)
 	sync();
 
 	return ret;
+}
+
+
+
+/**
+ * @brief Database::overlapGet
+ * @param id
+ * @return
+ */
+
+QVariantList Database::overlapGet(const int &id) const
+{
+	auto db = QSqlDatabase::database(m_databaseName);
+	if (!db.isOpen()) {
+		LOG_CERROR("app") << "Database isn't opened";
+		return {};
+	}
+
+	const QMap<QString, FieldConvertVariantFunc> converter = {
+		{ QStringLiteral("id"), [](const QVariant &v) -> QVariant { return v.toLongLong(); } },
+		{ QStringLiteral("start"), [](const QVariant &v) -> QVariant { return v.toDate(); } },
+		{ QStringLiteral("end"), [](const QVariant &v) -> QVariant {
+			  if (v.isNull())
+			  return QVariant(QMetaType::fromType<QDate>());
+			  else
+			  return v.toDate();
+		  } },
+		{ QStringLiteral("name"), [](const QVariant &v) -> QVariant { return v.toString(); } },
+		{ QStringLiteral("hour"), [](const QVariant &v) -> QVariant { return v.toInt(); } },
+		{ QStringLiteral("value"), [](const QVariant &v) -> QVariant { return v.toInt(); } },
+	};
+
+	const auto &jobList = QueryBuilder::q(db)
+						  .addQuery("SELECT id, start, end, name, master, type, hour, value "
+									 "FROM overlap LEFT JOIN job ON (job.id=overlap.jobid2) "
+									 "WHERE jobid1=").addValue(id)
+								  .addQuery(" ORDER BY start")
+						  .execToVariantList(converter);
+
+	if (!jobList) {
+		LOG_CWARNING("app") << "Sql error:" << qPrintable(m_databaseName);
+		return {};
+	}
+
+	return *jobList;
 }
 
 
@@ -832,42 +924,42 @@ QString Database::toMarkdown() const
 {
 	QString txt;
 
-	txt.append(QStringLiteral("# "))
-			.append(m_title)
-			.append(QStringLiteral("\n\n"));
-	txt.append(QStringLiteral("---\n\n"));
+	txt.append(QStringLiteral("<html><body>\n"));
 
-	txt.append(QStringLiteral("### Munkaviszony: ***%1 év %2 nap***\n\n")
+	txt.append(QStringLiteral("<h1>"))
+			.append(m_title)
+			.append(QStringLiteral("</h1>"));
+
+	txt.append(QStringLiteral("<h4>Munkaviszony: <i>%1 év %2 nap</i><br/>")
 			   .arg(m_calculation.value(QStringLiteral("jobYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("jobDays"), 0).toInt())
 			   );
 
-	txt.append(QStringLiteral("### Gyakorlati idő: ***%1 év %2 nap***\n\n")
+	txt.append(QStringLiteral("Gyakorlati idő: <i>%1 év %2 nap</i><br/>")
 			   .arg(m_calculation.value(QStringLiteral("practiceYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("practiceDays"), 0).toInt())
 			   );
 
-	txt.append(QStringLiteral("### Jubileumi jutalom: ***%1 év %2 nap***\n\n")
+	txt.append(QStringLiteral("Jubileumi jutalom: <i>%1 év %2 nap</i></h4>")
 			   .arg(m_calculation.value(QStringLiteral("prestigeYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("prestigeDays"), 0).toInt())
 			   );
 
 	if (const int nextY = m_calculation.value(QStringLiteral("nextPrestigeYears"), 0).toInt(); nextY > 0) {
-		txt.append(QStringLiteral("### Következő jubileumi jutalom időpontja: ***%1*** *(%2 év)*\n\n")
+		txt.append(QStringLiteral("<h4>Következő jubileumi jutalom időpontja: <i>%1</i> (%2 év)</h4>")
 				   .arg(QLocale().toString(m_calculation.value(QStringLiteral("nextPrestige")).toDate(), QStringLiteral("yyyy. MMMM d.")))
 				   .arg(m_calculation.value(QStringLiteral("nextPrestigeYears"), 0).toInt())
 				   );
 	}
 
-	txt.append(QStringLiteral("---\n\n"));
-
+	txt.append(QStringLiteral("<h3>&nbsp;</h3>"));
 
 	const QVariantList &list = m_model->storage();
 
 	for (const auto &v : list) {
 		const QVariantMap &map = v.toMap();
 
-		txt.append(QStringLiteral("### "));
+		txt.append(QStringLiteral("<h3>"));
 		txt.append(map.value(QStringLiteral("name")).toString())
 				.append(QStringLiteral(" ("))
 				.append(QLocale().toString(map.value(QStringLiteral("start")).toDate(), QStringLiteral("yyyy. MMMM d.")))
@@ -876,39 +968,45 @@ QString Database::toMarkdown() const
 		if (map.contains(QStringLiteral("end")))
 			txt.append(QLocale().toString(map.value(QStringLiteral("end")).toDate(), QStringLiteral("yyyy. MMMM d.")));
 
-		txt.append(QStringLiteral(")\n\n"));
+		txt.append(QStringLiteral(")</h3>"));
 
-		txt.append(QStringLiteral("Foglalkoztatási jogviszony: **%1**, ").arg(map.value(QStringLiteral("type")).toString()))
-				.append(QStringLiteral("munkaidő: **%1 óra**, ").arg(map.value(QStringLiteral("hour")).toInt()))
-				.append(QStringLiteral("heti munkaóra: **%1 óra**\n\n").arg(map.value(QStringLiteral("value")).toInt()));
+		txt.append(QStringLiteral("<p>Foglalkoztatási jogviszony: <b>%1</b>, ").arg(map.value(QStringLiteral("type")).toString()))
+				.append(QStringLiteral("munkaidő: <b>%1 óra</b>, ").arg(map.value(QStringLiteral("hour")).toInt()))
+				.append(QStringLiteral("heti munkaóra: <b>%1 óra</b><br/>").arg(map.value(QStringLiteral("value")).toInt()));
 
-		txt.append(QStringLiteral("Munkáltató vagy megbízó:\n\n> "));
-		txt.append(map.value(QStringLiteral("master")).toString().replace(QStringLiteral("\n"), QStringLiteral("\n\n> ")));
-		txt.append(QStringLiteral("\n\n"));
+		txt.append(QStringLiteral("Munkáltató vagy megbízó:</p><p style=\"margin-left: 250px;\"><small>"));
+		txt.append(map.value(QStringLiteral("master")).toString().replace(QStringLiteral("\n"), QStringLiteral("<br/>")));
+		txt.append(QStringLiteral("</small></p>"));
 
-		txt.append(QStringLiteral("Számított munkaviszony: **%1 év %2 nap**\n\n")
+		txt.append(QStringLiteral("<p>Számított munkaviszony: <b>%1 év %2 nap</b><br/>")
 				   .arg(map.value(QStringLiteral("jobYears"), 0).toInt())
 				   .arg(map.value(QStringLiteral("jobDays"), 0).toInt())
 				   );
 
-		txt.append(QStringLiteral("Számított gyakorlati idő: **%1 év %2 nap**\n\n")
+		txt.append(QStringLiteral("Számított gyakorlati idő: <b>%1 év %2 nap</b><br/>")
 				   .arg(map.value(QStringLiteral("practiceYears"), 0).toInt())
 				   .arg(map.value(QStringLiteral("practiceDays"), 0).toInt())
 				   );
 
-		txt.append(QStringLiteral("Számított jubileumi jutalom: **%1 év %2 nap**\n\n")
+		txt.append(QStringLiteral("Számított jubileumi jutalom: <b>%1 év %2 nap</b></p>")
 				   .arg(map.value(QStringLiteral("prestigeYears"), 0).toInt())
 				   .arg(map.value(QStringLiteral("prestigeDays"), 0).toInt())
 				   );
 
-		txt.append(QStringLiteral("---\n\n"));
-
 	}
 
-	txt.append(QStringLiteral("Készült: "))
-			.append(QLocale().toString(QDate::currentDate(), QStringLiteral("yyyy. MMMM d.")))
-			.append(QStringLiteral("\n\n"));
+	txt.append(QStringLiteral("<h1>&nbsp;</h1>"));
 
+	txt.append(QStringLiteral("<table width=\"100%\"><tr><td valign=middle><img height=30 src=\"imgdata://piar.png\"></td>"
+							  "<td width=\"100%\" valign=middle style=\"padding-left: 10px;\"><p><small>Gyarkolati idő kalkulátor v%2.%3 &ndash; &copy; Valaczka János Pál<br/>"
+							  "Készült: %1</small></p>"
+							  "</td></tr></table>\n\n")
+			   .arg(QLocale().toString(QDateTime::currentDateTime(), QStringLiteral("yyyy. MMMM d. HH:mm:ss")))
+			   .arg(Application::versionMajor())
+			   .arg(Application::versionMinor())
+			   );
+
+	txt.append(QStringLiteral("</body></html>"));
 
 	return txt;
 }

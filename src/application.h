@@ -40,11 +40,27 @@ public:
 	Application(QGuiApplication *app);
 	virtual ~Application();
 
-	Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral("*"));
+	enum Field {
+		Invalid = 0,
+		StartDate,
+		EndDate,
+		Name,
+		Master,
+		Type,
+		Hour,
+		Value
+	};
+
+	Q_ENUM(Field)
+
+	Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral(".json"));
 	Q_INVOKABLE virtual void dbSave();
 	Q_INVOKABLE virtual void dbPrint();
 	Q_INVOKABLE bool dbCreate(const QString &title);
 	Q_INVOKABLE void dbClose();
+
+	Q_INVOKABLE virtual void importTemplateDownload() const;
+	Q_INVOKABLE virtual void import();
 
 	Q_INVOKABLE static int yearsBetween(const QDate &date1, const QDate &date2);
 	Q_INVOKABLE static int daysBetween(const QDate &date1, const QDate &date2);
@@ -66,6 +82,10 @@ protected:
 
 	bool loadFromJson(const QJsonObject &data);
 	QByteArray toTextDocument() const;
+	QByteArray importTemplate() const;
+	bool importData(const QByteArray &data);
+
+	static const QHash<Field, QString> m_fieldMap;
 
 	std::unique_ptr<Database> m_database;
 

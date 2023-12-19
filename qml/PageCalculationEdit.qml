@@ -8,6 +8,7 @@ QPage {
 	id: root
 
 	property var editData: null
+	property int _calcDestination: 1
 
 	closeQuestion: _form.modified ? qsTr("Biztosan eldobod a módosításokat?") : ""
 
@@ -40,7 +41,7 @@ QPage {
 		QFormColumn {
 			id: _form
 
-			width: Math.min(parent.width, Qaterial.Style.maxContainerSize, Qaterial.Style.pixelSizeRatio*500)
+			width: Math.min(parent.width, Qaterial.Style.maxContainerSize, Qaterial.Style.pixelSizeRatio*600)
 
 			Qaterial.LabelBody1 {
 				width: parent.width
@@ -91,9 +92,18 @@ QPage {
 				field: "jobDays"
 				text: qsTr("Számított napok száma:")
 				from: 0
-				to: editData ? (_jobYears.value == _jobYears.to ? editData.durationDays : 365) : 0
+				to: editData ? (_jobYears.value == _jobYears.to ? editData.durationDays : 364) : 0
 				spin.editable: true
 				visible: _job.currentValue === 2
+			}
+
+			QButton {
+				anchors.horizontalCenter: parent.horizontalCenter
+				highlighted: true
+				icon.source: Qaterial.Icons.calculator
+				text: qsTr("Számítás")
+				visible: _job.currentValue === 2 && _rptr.count
+				onClicked: loadCalculator(1)
 			}
 
 
@@ -133,6 +143,15 @@ QPage {
 				visible: _practice.currentValue === 2
 			}
 
+			QButton {
+				anchors.horizontalCenter: parent.horizontalCenter
+				highlighted: true
+				icon.source: Qaterial.Icons.calculator
+				text: qsTr("Számítás")
+				visible: _practice.currentValue === 2 && _rptr.count
+				onClicked: loadCalculator(2)
+			}
+
 
 			QFormSection {
 				icon.source: Qaterial.Icons.medal
@@ -164,9 +183,18 @@ QPage {
 				field: "prestigeDays"
 				text: qsTr("Számított napok száma:")
 				from: 0
-				to: editData ? (_prestigeYears.value == _prestigeYears.to ? editData.durationDays : 365) : 0
+				to: editData ? (_prestigeYears.value == _prestigeYears.to ? editData.durationDays : 364) : 0
 				spin.editable: true
 				visible: _prestige.currentValue === 2
+			}
+
+			QButton {
+				anchors.horizontalCenter: parent.horizontalCenter
+				highlighted: true
+				icon.source: Qaterial.Icons.calculator
+				text: qsTr("Számítás")
+				visible: _prestige.currentValue === 2 && _rptr.count
+				onClicked: loadCalculator(3)
 			}
 
 			QButton
@@ -174,10 +202,134 @@ QPage {
 				anchors.horizontalCenter: parent.horizontalCenter
 				action: _actionSave
 			}
+
+
+			QFormSection {
+				icon.source: Qaterial.Icons.calendarCollapseHorizontal
+				text: qsTr("Átfedések")
+				color: Qaterial.Style.iconColor()
+				visible: _rptr.count
+			}
+
+			Repeater {
+				id: _rptr
+
+				delegate: Qaterial.ItemDelegate {
+					width: _form.width
+					text: modelData.name
+					secondaryText: new Date(modelData.start).toLocaleDateString(Qt.locale(), "yyyy. MMMM d.")
+								   + (modelData.end ? (" - " + new Date(modelData.end).toLocaleDateString(Qt.locale(), "yyyy. MMMM d.")) : "")
+				}
+			}
+
+
 		}
+
+
 
 	}
 
+
+
+	function loadCalculator(_dest) {
+		_calcDestination = _dest
+		Qaterial.DialogManager.openFromComponent(_dialog)
+	}
+
+
+
+
+	Component {
+		id: _dialog
+
+		Qaterial.ModalDialog
+		{
+			id: control
+
+			dialogImplicitWidth: 600
+
+			title: switch(root._calcDestination) {
+				   case 1: return qsTr("Munkaviszony")
+				   case 2: return qsTr("Szakmai gyakorlat")
+				   default: return qsTr("Jubileumi jutalom")
+				   }
+
+
+			contentItem: GridLayout
+			{
+				id: _grid
+				rowSpacing: 10
+				columnSpacing: 5
+				columns: 2
+
+				Qaterial.LabelCaption {
+					text: qsTr("Első nap:")
+				}
+
+				Qaterial.ComboBox {
+					id: _combo1
+					font: Qaterial.Style.textTheme.body2
+					model: _calcModel
+					textRole: "text"
+					valueRole: "date"
+					Layout.fillWidth: true
+					onActivated: _grid.recalc()
+				}
+
+				Qaterial.LabelCaption {
+					text: qsTr("Utolsó nap:")
+				}
+
+				Qaterial.ComboBox {
+					id: _combo2
+					font: Qaterial.Style.textTheme.body2
+					model: _calcModel
+					textRole: "text"
+					valueRole: "date"
+					Layout.fillWidth: true
+					onActivated: _grid.recalc()
+				}
+
+				Qaterial.LabelCaption {
+					text: qsTr("Időtartam:")
+				}
+
+				Qaterial.LabelBody1 {
+					id: _lblCalc
+					property int years: 0
+					property int days: 0
+					text: qsTr("%1 év %2 nap").arg(years).arg(days)
+				}
+
+				function recalc() {
+					_lblCalc.years = App.yearsBetween(_combo1.currentValue, _combo2.currentValue)
+					_lblCalc.days = App.daysBetween(_combo1.currentValue, _combo2.currentValue)
+				}
+			}
+
+			standardButtons: Dialog.Apply | Dialog.Close
+
+			onApplied: {
+				switch(root._calcDestination) {
+				case 1:
+					_jobYears.value = _lblCalc.years
+					_jobDays.value = _lblCalc.days
+					break
+				case 2:
+					_practiceYears.value = _lblCalc.years
+					_practiceDays.value = _lblCalc.days
+					break
+				case 3:
+					_prestigeYears.value = _lblCalc.years
+					_prestigeDays.value = _lblCalc.days
+					break
+				}
+				_form.modified = true
+				close()
+			}
+		}
+
+	}
 
 
 
@@ -205,6 +357,10 @@ QPage {
 	}
 
 
+	ListModel {
+		id: _calcModel
+	}
+
 
 	Component.onCompleted: {
 		if (!editData)
@@ -217,6 +373,41 @@ QPage {
 						   _practice, _practiceYears, _practiceDays,
 						   _prestige, _prestigeYears, _prestigeDays,
 					   ], d)
+
+
+		let list = App.database.overlapGet(editData.id)
+
+		_rptr.model = list
+
+		_calcModel.clear()
+
+		_calcModel.append({
+							  date: editData.start,
+							  text: editData.name+qsTr(" kezdete: ")+new Date(editData.start).toLocaleDateString(Qt.locale(), "yyyy-MM-dd")
+						  })
+
+		if (editData.end) {
+			_calcModel.append({
+								  date: editData.end,
+								  text: editData.name+qsTr(" vége: ")+new Date(editData.end).toLocaleDateString(Qt.locale(), "yyyy-MM-dd")
+							  })
+		}
+
+		for (let i=0; i<list.length; ++i) {
+			let ll = list[i]
+
+			_calcModel.append({
+								  date: ll.start,
+								  text: ll.name+qsTr(" kezdete: ")+new Date(ll.start).toLocaleDateString(Qt.locale(), "yyyy-MM-dd")
+							  })
+
+			if (ll.end) {
+				_calcModel.append({
+									  date: ll.end,
+									  text: ll.name+qsTr(" vége: ")+new Date(ll.end).toLocaleDateString(Qt.locale(), "yyyy-MM-dd")
+								  })
+			}
+		}
 
 	}
 

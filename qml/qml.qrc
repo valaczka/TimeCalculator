@@ -28,5 +28,7 @@
         <file>PageDatabase.qml</file>
         <file>QMenu.qml</file>
         <file>QMenuItem.qml</file>
+        <file>PageImport.qml</file>
+        <file>QLabelInformative.qml</file>
     </qresource>
 </RCC>

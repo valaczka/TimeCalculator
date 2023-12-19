@@ -16,3 +16,6 @@
 [submodule "lib/QtXlsxWriter"]
 	path = lib/QtXlsxWriter
 	url = https://github.com/valaczka/QtXlsxWriter.git
+[submodule "lib/emscripten-browser-file"]
+	path = lib/emscripten-browser-file
+	url = https://github.com/Armchair-Software/emscripten-browser-file.git

@@ -147,8 +147,8 @@ protected:
 
 #ifdef Q_OS_WASM
 	void enableTabCloseConfirmation(bool enable);
-	void wasmOpen(const QString &accept, std::function<void(const QByteArray &, const QString &)> func);
-	void wasmSave(const QByteArray &content, const QString &name);
+	//void wasmOpen(const QString &accept, void(*func)(const QByteArray &, const QString &));
+	void wasmSave(const QByteArray &content, const QString &name, const QString &mime = QStringLiteral("application/octet-stream")) const;
 #endif
 
 

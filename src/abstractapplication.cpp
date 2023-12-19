@@ -36,9 +36,9 @@
 #include "utils_.h"
 
 #ifdef Q_OS_WASM
-#include <QtGui/private/qwasmlocalfileaccess_p.h>
 #include <emscripten/val.h>
 #include <emscripten/bind.h>
+#include "emscripten_browser_file.h"
 #endif
 
 
@@ -943,9 +943,9 @@ void AbstractApplication::enableTabCloseConfirmation(bool enable)
  * @param func
  */
 
-void AbstractApplication::wasmOpen(const QString &accept, std::function<void (const QByteArray &, const QString &)> func)
-{
-	struct LoadFileData {
+//void AbstractApplication::wasmOpen(const QString &accept, void(*func)(const QByteArray &, const QString &))
+//{
+	/*struct LoadFileData {
 		QString name;
 		QByteArray buffer;
 	};
@@ -969,8 +969,16 @@ void AbstractApplication::wasmOpen(const QString &accept, std::function<void (co
 			func(content, name);
 
 		delete fileData;
-	});
-}
+	});*/
+
+	/*emscripten_browser_file::upload(accept.toStdString(), [](std::string const &filename,
+									std::string const &mime_type,
+									std::string_view buffer, void *funcPtr){
+		QByteArray content(buffer.data(), buffer.length());
+
+
+	}, &func);*/
+//}
 
 
 
@@ -980,10 +988,16 @@ void AbstractApplication::wasmOpen(const QString &accept, std::function<void (co
  * @param name
  */
 
-void AbstractApplication::wasmSave(const QByteArray &content, const QString &name)
+void AbstractApplication::wasmSave(const QByteArray &content, const QString &name, const QString &mime) const
 {
-	QWasmLocalFileAccess::saveFile(content.constData(), size_t(content.size()),
-								   name.toStdString());
+	/*QWasmLocalFileAccess::saveFile(content.constData(), size_t(content.size()),
+								   name.toStdString());*/
+
+	const std::string &filename = name.toStdString();
+	const std::string &mime_type = mime.toStdString();
+	const std::string &data = content.toStdString();
+
+	emscripten_browser_file::download(filename, mime_type, data);
 }
 
 

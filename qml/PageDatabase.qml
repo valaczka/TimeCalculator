@@ -21,6 +21,7 @@ QPage {
 			id: menu
 
 			QMenuItem { action: actionRename }
+			QMenuItem { action: actionImport }
 			Qaterial.MenuSeparator {}
 			QMenuItem { action: actionSave }
 			QMenuItem { action: _actionPrint }
@@ -78,23 +79,12 @@ QPage {
 		}
 	}
 
-	/*
 	Action {
-		id: actionAbout
-		text: qsTr("Névjegy")
-		icon.source: "qrc:/internal/img/callofsuli_square.svg"
-		onTriggered: {
-			onClicked: Client.stackPushPage("PageAbout.qml", {})
-		}
+		id: actionImport
+		text: qsTr("Importálás")
+		icon.source: Qaterial.Icons.import_
+		onTriggered: App.stackPushPage("PageImport.qml")
 	}
-
-	Action {
-		id: actionExit
-		icon.source: Qaterial.Icons.applicationExport
-		text: qsTr("Kilépés")
-		onTriggered: Client.closeWindow()
-	}
-*/
 
 
 

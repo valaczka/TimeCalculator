@@ -42,3 +42,12 @@ else: LIBS += -lQtXlsxWriter
 # QSyncable
 
 include(qsyncable.pri)
+
+
+# Emscripten-browser-file
+
+wasm {
+	INCLUDEPATH += $$PWD/emscripten-browser-file
+
+	LIBS += -sEXPORTED_RUNTIME_METHODS=[ccall,specialHTMLTargets] -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_FUNCTIONS=[_main,_malloc,_free]
+}

@@ -27,7 +27,7 @@
 #include "onlineapplication.h"
 #include "Logger.h"
 #include "utils_.h"
-
+#include "emscripten_browser_file.h"
 
 
 OnlineApplication::OnlineApplication(QGuiApplication *app)
@@ -52,15 +52,31 @@ void OnlineApplication::dbOpen(const QString &accept)
 	if (m_database)
 		return messageError(tr("Már meg van nyitva egy adatbázis!"));
 
-	wasmOpen(accept, [this](const QByteArray &content, const QString &){
+	emscripten_browser_file::upload(accept.toStdString(), [](std::string const &/*filename*/,
+									std::string const &/*mime_type*/,
+									std::string_view buffer, void *ptr){
+		if (!ptr) {
+			LOG_CERROR("app") << "Invalid argument";
+			return;
+		}
+
+		OnlineApplication *app = reinterpret_cast<OnlineApplication*>(ptr);
+
+		if (!app) {
+			LOG_CERROR("app") << "Invalid argument";
+			return;
+		}
+
+		QByteArray content(buffer.data(), buffer.length());
 		const auto &json = Utils::byteArrayToJsonObject(content);
 
 		if (!json) {
-			messageError(tr("Érvénytelen fájl"));
+			app->messageError(tr("Érvénytelen fájl"));
 		} else {
-			loadFromJson(*json);
+			app->loadFromJson(*json);
 		}
-	});
+
+	}, this);
 
 }
 
@@ -81,7 +97,7 @@ void OnlineApplication::dbSave()
 		QJsonDocument doc(*json);
 		const QByteArray &content = doc.toJson();
 
-		wasmSave(content, m_database->title().append(QStringLiteral(".json")));
+		wasmSave(content, m_database->title().append(QStringLiteral(".json")), QStringLiteral("application/json"));
 
 		m_database->setModified(false);
 	} else
@@ -100,7 +116,63 @@ void OnlineApplication::dbPrint()
 
 	const QByteArray &content = toTextDocument();
 
-	wasmSave(content, m_database->title().append(QStringLiteral(".pdf")));
+	wasmSave(content, m_database->title().append(QStringLiteral(".pdf")), QStringLiteral("application/pdf"));
+}
+
+
+/**
+ * @brief OnlineApplication::importTemplateDownload
+ */
+
+void OnlineApplication::importTemplateDownload() const
+{
+	const QByteArray &content = importTemplate();
+	wasmSave(content, QStringLiteral("import_sablon.xlsx"),
+			 QStringLiteral("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+}
+
+
+/**
+ * @brief OnlineApplication::import
+ */
+
+void OnlineApplication::import()
+{
+	if (!m_database)
+		return messageError(tr("Nincs megnyitva adatbázis!"));
+
+	emscripten_browser_file::upload(std::string{".xlsx"}, [](std::string const &/*filename*/,
+									std::string const &/*mime_type*/,
+									std::string_view buffer, void *ptr){
+		if (!ptr) {
+			LOG_CERROR("app") << "Invalid argument";
+			return;
+		}
+
+		OnlineApplication *app = reinterpret_cast<OnlineApplication*>(ptr);
+
+		if (!app) {
+			LOG_CERROR("app") << "Invalid argument";
+			return;
+		}
+
+		QByteArray content(buffer.data(), buffer.length());
+
+		if (!app->importData(content)) {
+			app->messageError(tr("Hibás fájl"));
+		} else {
+			app->messageInfo(tr("Az importálás sikerült."));
+		}
+	}, this);
+
+
+	/*wasmOpen(QStringLiteral("*.xlsx"), [this](const QByteArray &content, const QString &){
+		if (!importData(content)) {
+			messageError(tr("Hibás fájl"));
+		} else {
+			messageInfo(tr("Az importálás sikerült."));
+		}
+	});*/
 }
 
 

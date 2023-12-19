@@ -29,6 +29,19 @@
 #include "qtextdocument.h"
 #include <QPdfWriter>
 #include "utils_.h"
+#include "xlsxdocument.h"
+
+const QHash<Application::Field, QString> Application::m_fieldMap = {
+	{ StartDate, QStringLiteral("Jogviszony kezdete") },
+	{ EndDate, QStringLiteral("Jogviszony vége") },
+	{ Name, QStringLiteral("Munkakör") },
+	{ Master, QStringLiteral("Munkáltató") },
+	{ StartDate, QStringLiteral("Jogviszony kezdete") },
+	{ Type, QStringLiteral("Jogviszony típusa") },
+	{ Hour, QStringLiteral("Munkaidő") },
+	{ Value, QStringLiteral("Heti óraszám") },
+};
+
 
 
 /**
@@ -161,6 +174,48 @@ void Application::dbClose()
 
 
 /**
+ * @brief Application::importTemplateDownload
+ */
+
+void Application::importTemplateDownload() const
+{
+	const QByteArray &data = importTemplate();
+
+	QFile f("/tmp/_import.xlsx");
+	f.open(QIODevice::WriteOnly);
+	f.write(data);
+	f.close();
+
+	snack(tr("Sablon elkészült"));
+}
+
+
+/**
+ * @brief Application::import
+ */
+
+void Application::import()
+{
+	if (!m_database)
+		return messageError(tr("Nincs megnyitva adatbázis!"));
+
+	if (QFile::exists("/tmp/_import.xlsx")) {
+		const auto &content = Utils::fileContent("/tmp/_import.xlsx");
+		if (!content) {
+			messageError(tr("Érvénytelen fájl"));
+		} else {
+			if (!importData(*content)) {
+				messageError(tr("Hibás fájl"));
+			} else {
+				messageInfo(tr("Az importálás sikerült."));
+			}
+		}
+	}
+}
+
+
+
+/**
  * @brief Application::yearsBetween
  * @param date1
  * @param date2
@@ -275,6 +330,7 @@ bool Application::loadFromJson(const QJsonObject &data)
 		return false;
 	}
 
+	db->sync();
 	setDatabase(db);
 	stackPushPage(QStringLiteral("PageDatabase.qml"));
 
@@ -296,10 +352,10 @@ QByteArray Application::toTextDocument() const
 	QFont font(QStringLiteral("Noto Sans"), 9);
 
 	document.setDefaultFont(font);
-	document.setMarkdown(m_database->toMarkdown());
+	document.setHtml(m_database->toMarkdown());
 
-	/*QImage img = QImage::fromData(Utils::fileContent(":/piar.png").value_or(QByteArray{}));
-	document.addResource(QTextDocument::ImageResource, QUrl("imgdata://piar.png"), QVariant(img));*/
+	QImage img = QImage::fromData(Utils::fileContent(":/piar.png").value_or(QByteArray{}));
+	document.addResource(QTextDocument::ImageResource, QUrl("imgdata://piar.png"), QVariant(img));
 
 
 	QByteArray content;
@@ -323,6 +379,164 @@ QByteArray Application::toTextDocument() const
 	buffer.close();
 
 	return content;
+}
+
+
+
+/**
+ * @brief Application::importTemplate
+ * @return
+ */
+
+QByteArray Application::importTemplate() const
+{
+	QXlsx::Document doc;
+
+	QXlsx::Format format;
+	format.setBottomBorderStyle(QXlsx::Format::BorderMedium);
+	format.setFontBold(true);
+
+
+	static const QVector<QMap<Field, QVariant>> records = {
+		{
+			{ StartDate, QDate::currentDate().addYears(-1) },
+			{ EndDate, QDate::currentDate() },
+			{ Name, QStringLiteral("pedagógus") },
+			{ Master, QStringLiteral("Petőfi Sándor Általános Iskola\nBudapest") },
+			{ Type, QStringLiteral("munkaszerződés") },
+			{ Hour, 40 },
+		},
+
+	};
+
+	int cell = 1;
+
+	const QMetaEnum enumId = QMetaEnum::fromType<Field>();
+
+	// Header
+
+	for (int i=0; i<enumId.keyCount(); ++i) {
+		const Field &field = QVariant(enumId.value(i)).value<Field>();
+		const QString &name = m_fieldMap.value(field);
+		if (name.isEmpty())
+			continue;
+
+		int row = 1;
+		doc.write(row, cell, name, format);
+
+		// Example records
+
+		for (auto it = records.constBegin(); it != records.constEnd(); ++it) {
+			const QVariant &txt = it->value(field);
+			++row;
+
+			if (txt.isNull())
+				continue;
+
+			doc.write(row, cell, txt);
+		}
+
+		++cell;
+	}
+
+	//const double w = doc.columnWidth(1) * 6.;
+	//doc.setColumnWidth(1, cell, w);
+
+
+	QBuffer buf;
+	doc.saveAs(&buf);
+	return buf.data();
+}
+
+
+
+/**
+ * @brief Application::importData
+ * @param data
+ * @return
+ */
+
+bool Application::importData(const QByteArray &data)
+{
+	if (!m_database)
+		return false;
+
+	QBuffer buf;
+	buf.setData(data);
+	buf.open(QIODevice::ReadOnly);
+
+	QXlsx::Document doc(&buf);
+
+	buf.close();
+
+	QHash<int, Field> headers;
+
+	const QXlsx::CellRange &range = doc.dimension();
+
+	for (int i=range.firstColumn(); i<=range.lastColumn(); ++i) {
+		const QString &txt = doc.read(range.firstRow(), i).toString();
+
+		const Field &field = m_fieldMap.key(txt, Invalid);
+
+		if (field != Invalid)
+			headers.insert(i, field);
+	}
+
+	if (headers.isEmpty()) {
+		return false;
+	}
+
+	QVector<QVariantMap> list;
+
+	for (int row=range.firstRow()+1; row<=range.lastRow(); ++row) {
+		QVariantMap map;
+
+		for (auto it = headers.constBegin(); it != headers.constEnd(); ++it) {
+			const QVariant &cell = doc.read(row, it.key());
+
+			if (cell.isNull())
+				continue;
+
+			LOG_CINFO("app") << cell.toString() << cell.toDate() << cell.canConvert<QDate>();
+
+			if (it.value() == StartDate || it.value() == EndDate) {
+				QDate destDate;
+
+				if (cell.canConvert<QDate>())
+					destDate = cell.toDate();
+				else if (const QDate &d = QDate::fromString(cell.toString(), QStringLiteral("yyyy-MM-dd")); !d.isNull()) {
+					destDate = d;
+				} else {
+					static const QDate refDate(1899, 12, 31);
+					const int cNum = cell.toInt();
+
+					if (cNum > refDate.daysTo(QDate(1970, 1, 1)))
+						destDate = refDate.addDays(cNum-1);				// Excel BUG: Excel dates after 28th February 1900 are actually one day out. Excel behaves as though the date 29th February 1900 existed, which it didn't.
+				}
+
+				if (it.value() == StartDate && !destDate.isNull())
+					map[QStringLiteral("start")] = destDate;
+				else if (it.value() == EndDate && !destDate.isNull())
+					map[QStringLiteral("end")] = destDate;
+			} else if (it.value() == Name)
+				map[QStringLiteral("name")] = cell.toString();
+			else if (it.value() == Master)
+				map[QStringLiteral("master")] = cell.toString();
+			else if (it.value() == Type)
+				map[QStringLiteral("type")] = cell.toString();
+			else if (it.value() == Hour)
+				map[QStringLiteral("hour")] = cell.toInt();
+			else if (it.value() == Value)
+				map[QStringLiteral("value")] = cell.toInt();
+		}
+
+		if (map.isEmpty())
+			continue;
+
+		list.append(map);
+	}
+
+	return m_database->jobAddBatch(list);
 }
 
 

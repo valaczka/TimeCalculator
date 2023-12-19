@@ -35,9 +35,12 @@ public:
 	OnlineApplication(QGuiApplication *app);
 	virtual ~OnlineApplication() {}
 
-	Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral("*")) override;
+	Q_INVOKABLE virtual void dbOpen(const QString &accept = QStringLiteral(".json")) override;
 	Q_INVOKABLE virtual void dbSave() override;
 	Q_INVOKABLE virtual void dbPrint() override;
+
+	Q_INVOKABLE virtual void importTemplateDownload() const override;
+	Q_INVOKABLE virtual void import() override;
 };
 
 #endif // ONLINEAPPLICATION_H

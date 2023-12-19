@@ -5,8 +5,6 @@ TARGET = TimeCalculator
 
 QT += gui quick svg quickcontrols2 sql
 
-wasm: QT += gui-private
-
 CONFIG += c++17
 CONFIG += separate_debug_info
 

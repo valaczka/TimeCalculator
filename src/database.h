@@ -50,11 +50,13 @@ public:
 	static Database *fromJson(const QJsonObject &json) { return fromJson(QStringLiteral(""), json); }
 
 	Q_INVOKABLE int jobAdd(const QJsonObject &data);
+	bool jobAddBatch(const QVector<QVariantMap> &data);
 	Q_INVOKABLE bool jobEdit(const int &id, const QJsonObject &data);
 	Q_INVOKABLE bool jobDelete(const int &id);
 
 	Q_INVOKABLE QVariantMap calculationGet(const int &id) const;
 	Q_INVOKABLE bool calculationEdit(const int &id, const QJsonObject &data);
+	Q_INVOKABLE QVariantList overlapGet(const int &id) const;
 
 	Q_INVOKABLE void sync();
 
