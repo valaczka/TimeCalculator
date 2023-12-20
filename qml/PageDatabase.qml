@@ -107,7 +107,7 @@ QPage {
 			anchors.left: _view.left
 			width: _view.width
 			horizontalAlignment: Qt.AlignLeft
-			text: App.database ? qsTr("Munkaviszony: %1 év %2 nap\n").arg(App.database.calculation.jobYears).arg(App.database.calculation.jobDays) : ""
+			text: App.database ? qsTr("Jelenlegi jogviszony (piarista): %1 év %2 nap\n").arg(App.database.calculation.jobYears).arg(App.database.calculation.jobDays) : ""
 		}
 
 		Qaterial.IconLabel {

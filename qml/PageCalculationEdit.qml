@@ -64,7 +64,7 @@ QPage {
 
 			QFormSection {
 				icon.source: Qaterial.Icons.briefcaseVariant
-				text: qsTr("Munkaviszony")
+				text: qsTr("Jelenlegi jogviszony (piarista)")
 			}
 
 			QFormComboBox {
@@ -249,7 +249,7 @@ QPage {
 			dialogImplicitWidth: 600
 
 			title: switch(root._calcDestination) {
-				   case 1: return qsTr("Munkaviszony")
+				   case 1: return qsTr("Jelenlegi jogviszony (piarista)")
 				   case 2: return qsTr("Szakmai gyakorlat")
 				   default: return qsTr("Jubileumi jutalom")
 				   }

@@ -117,17 +117,9 @@ QPage {
 				id: _type
 				field: "type"
 				text: qsTr("Típusa:")
-				model: ListModel {
-					id: _typeModel
-					ListElement { text: qsTr("munkaszerződés") }
-					ListElement { text: qsTr("megbízási szerződés") }
-					ListElement { text: qsTr("egyházi szolgálati jogviszony") }
-					ListElement { text: qsTr("Kjt. vagy más állami jogviszony") }
-					ListElement { text: qsTr("egyéni vállalkozó") }
-					ListElement { text: qsTr("GYED/GYES/egyéb tartós távollét") }
-				}
-				combo.implicitWidth: Qaterial.Style.pixelSizeRatio*300
-				combo.editable: true
+				model: App.jobTypeList
+				combo.implicitWidth: Qaterial.Style.pixelSizeRatio*400
+				combo.editable: false
 				currentIndex: -1
 			}
 

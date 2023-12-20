@@ -35,6 +35,7 @@ class Application : public AbstractApplication
 	Q_OBJECT
 
 	Q_PROPERTY(Database* database READ database NOTIFY databaseChanged FINAL)
+	Q_PROPERTY(QStringList jobTypeList READ jobTypeList CONSTANT FINAL)
 
 public:
 	Application(QGuiApplication *app);
@@ -69,6 +70,8 @@ public:
 	void setDatabase(Database *newDatabase);
 	void setDatabase(std::unique_ptr<Database> &newDatabase);
 
+	static QStringList jobTypeList();
+
 public slots:
 	virtual void onApplicationStarted();
 
@@ -88,7 +91,7 @@ protected:
 	static const QHash<Field, QString> m_fieldMap;
 
 	std::unique_ptr<Database> m_database;
-
+	static const QStringList m_jobTypeList;
 };
 
 #endif // APPLICATION_H

@@ -930,7 +930,7 @@ QString Database::toMarkdown() const
 			.append(m_title)
 			.append(QStringLiteral("</h1>"));
 
-	txt.append(QStringLiteral("<h4>Munkaviszony: <i>%1 év %2 nap</i><br/>")
+	txt.append(QStringLiteral("<h4>Jelenlegi jogviszony (piarista): <i>%1 év %2 nap</i><br/>")
 			   .arg(m_calculation.value(QStringLiteral("jobYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("jobDays"), 0).toInt())
 			   );
@@ -978,7 +978,7 @@ QString Database::toMarkdown() const
 		txt.append(map.value(QStringLiteral("master")).toString().replace(QStringLiteral("\n"), QStringLiteral("<br/>")));
 		txt.append(QStringLiteral("</small></p>"));
 
-		txt.append(QStringLiteral("<p>Számított munkaviszony: <b>%1 év %2 nap</b><br/>")
+		txt.append(QStringLiteral("<p>Számított jelenlegi jogviszony (piarista): <b>%1 év %2 nap</b><br/>")
 				   .arg(map.value(QStringLiteral("jobYears"), 0).toInt())
 				   .arg(map.value(QStringLiteral("jobDays"), 0).toInt())
 				   );

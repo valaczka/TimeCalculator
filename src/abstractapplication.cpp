@@ -57,7 +57,7 @@ const char *AbstractApplication::m_version = VERSION_FULL;
 AbstractApplication *AbstractApplication::m_instance = nullptr;
 
 #ifdef QT_NO_DEBUG
-const bool Application::m_debug = false;
+const bool AbstractApplication::m_debug = false;
 #else
 const bool AbstractApplication::m_debug = true;
 #endif

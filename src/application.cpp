@@ -29,6 +29,7 @@
 #include "qtextdocument.h"
 #include <QPdfWriter>
 #include "utils_.h"
+#include "xlsxdatavalidation.h"
 #include "xlsxdocument.h"
 
 const QHash<Application::Field, QString> Application::m_fieldMap = {
@@ -43,6 +44,15 @@ const QHash<Application::Field, QString> Application::m_fieldMap = {
 };
 
 
+
+const QStringList Application::m_jobTypeList = {
+	QStringLiteral("munkaszerződés"),
+	QStringLiteral("megbízási szerződés"),
+	QStringLiteral("egyházi szolgálati jogviszony"),
+	QStringLiteral("Kjt. vagy más állami jogviszony"),
+	QStringLiteral("egyéni vállalkozó"),
+	QStringLiteral("gyermekgondozás/egyéb tartós távollét"),
+};
 
 /**
  * @brief Application::Application
@@ -403,7 +413,7 @@ QByteArray Application::importTemplate() const
 			{ EndDate, QDate::currentDate() },
 			{ Name, QStringLiteral("pedagógus") },
 			{ Master, QStringLiteral("Petőfi Sándor Általános Iskola\nBudapest") },
-			{ Type, QStringLiteral("munkaszerződés") },
+			{ Type, m_jobTypeList.at(0) },
 			{ Hour, 40 },
 		},
 
@@ -434,6 +444,15 @@ QByteArray Application::importTemplate() const
 				continue;
 
 			doc.write(row, cell, txt);
+		}
+
+		if (field == Type) {
+			QXlsx::DataValidation dv(QXlsx::DataValidation::List, QXlsx::DataValidation::Equal,
+									 QString('"').append(m_jobTypeList.join(QChar(',')))
+									 .append('"')
+									 );
+			dv.addRange(2, cell, 200, cell);
+			doc.addDataValidation(dv);
 		}
 
 		++cell;
@@ -537,6 +556,17 @@ bool Application::importData(const QByteArray &data)
 	}
 
 	return m_database->jobAddBatch(list);
+}
+
+
+/**
+ * @brief Application::jobTypeList
+ * @return
+ */
+
+QStringList Application::jobTypeList()
+{
+	return m_jobTypeList;
 }
 
 
