@@ -359,7 +359,9 @@ QByteArray Application::toTextDocument() const
 {
 	QTextDocument document;
 
-	QFont font(QStringLiteral("Noto Sans"), 9);
+	document.setPageSize(QPageSize::sizePoints(QPageSize::A4));
+
+	QFont font(QStringLiteral("Noto Sans"), 7);
 
 	document.setDefaultFont(font);
 	document.setHtml(m_database->toMarkdown());
@@ -375,10 +377,11 @@ QByteArray Application::toTextDocument() const
 	QPdfWriter pdf(&buffer);
 	pdf.setCreator("Valaczka János Pál");
 	QPageLayout layout = pdf.pageLayout();
+	layout.setUnits(QPageLayout::Millimeter);
 	layout.setPageSize(QPageSize::A4);
-	layout.setMargins(QMarginsF(5, 5, 5, 5));
-	layout.setMinimumMargins(QMarginsF(5, 5, 5, 5));
-	layout.setMode(QPageLayout::FullPageMode);
+	layout.setMargins(QMarginsF(10, 10, 10, 10));
+	//layout.setMinimumMargins(QMarginsF(5, 5, 5, 5));
+	//layout.setMode(QPageLayout::FullPageMode);
 	pdf.setPageLayout(layout);
 
 	pdf.setTitle(QStringLiteral("Gyakorlati idő kalkulátor – ").append(m_database->title()));

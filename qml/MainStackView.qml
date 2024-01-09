@@ -43,7 +43,7 @@ Qaterial.StackView
 	popExit: transitionExit
 
 
-	function createPage(_qml : string, _prop : jsobject) : Item {
+	function createPage(_qml : string, _prop : variant) : Item {
 		var cmp = Qt.createComponent(_qml, Component.PreferSynchronous)
 
 		if (!cmp || cmp.status !== Component.Ready) {

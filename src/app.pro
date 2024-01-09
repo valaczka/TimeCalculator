@@ -3,7 +3,7 @@ lessThan(QT_MAJOR_VERSION, 6): error(Minimum Qt version 6 required)
 TEMPLATE = app
 TARGET = TimeCalculator
 
-QT += gui quick svg quickcontrols2 sql
+QT += gui quick svg quickcontrols2 sql printsupport
 
 CONFIG += c++17
 CONFIG += separate_debug_info

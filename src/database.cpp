@@ -974,7 +974,7 @@ QString Database::toMarkdown() const
 				.append(QStringLiteral("munkaidő: <b>%1 óra</b>, ").arg(map.value(QStringLiteral("hour")).toInt()))
 				.append(QStringLiteral("heti munkaóra: <b>%1 óra</b><br/>").arg(map.value(QStringLiteral("value")).toInt()));
 
-		txt.append(QStringLiteral("Munkáltató vagy megbízó:</p><p style=\"margin-left: 250px;\"><small>"));
+		txt.append(QStringLiteral("Munkáltató vagy megbízó:</p><p style=\"margin-left: 25px;\"><small>"));
 		txt.append(map.value(QStringLiteral("master")).toString().replace(QStringLiteral("\n"), QStringLiteral("<br/>")));
 		txt.append(QStringLiteral("</small></p>"));
 
@@ -995,11 +995,15 @@ QString Database::toMarkdown() const
 
 	}
 
-	txt.append(QStringLiteral("<h1>&nbsp;</h1>"));
+	txt.append(QStringLiteral("<p style=\"margin-top: 20px;\"><i>A munkáltató a mai napon a fenti, szakmai gyakorlati időre vonatkozó jogviszonyokat és köznevelési foglalkoztatotti jutalomra jogosító időket tartja nyilván.</i></p>"
+							  "<p style=\"margin-top: 20px;\">Kelt:</p>"
+							  "<p style=\"margin-top: 20px; margin-bottom: 80px;\">Aláírás (a munkáltató képviseletében):</p><p>&nbsp;</p>"));
 
-	txt.append(QStringLiteral("<table width=\"100%\"><tr><td valign=middle><img height=30 src=\"imgdata://piar.png\"></td>"
-							  "<td width=\"100%\" valign=middle style=\"padding-left: 10px;\"><p><small>Gyarkolati idő kalkulátor v%2.%3 &ndash; &copy; Valaczka János Pál<br/>"
-							  "Készült: %1</small></p>"
+	txt.append(QStringLiteral("<table width=\"100%\"><tr><td style=\"border-top: 1px solid #cccccc; font-size: 2pt;\">&nbsp;</td></tr></table>"));
+
+	txt.append(QStringLiteral("<table width=\"100%\"><tr><td valign=middle><img height=20 src=\"imgdata://piar.png\"></td>"
+							  "<td width=\"100%\" valign=middle style=\"padding-left: 10px;\"><p style=\"font-size: 5pt;\">Gyarkolati idő kalkulátor v%2.%3<br/>"
+							  "Készült: %1</p>"
 							  "</td></tr></table>\n\n")
 			   .arg(QLocale().toString(QDateTime::currentDateTime(), QStringLiteral("yyyy. MMMM d. HH:mm:ss")))
 			   .arg(Application::versionMajor())
