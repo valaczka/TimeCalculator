@@ -38,6 +38,7 @@ class Database : public QObject
 	Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
 	Q_PROPERTY(QSListModel* model READ model CONSTANT FINAL)
 	Q_PROPERTY(QVariantMap calculation READ calculation WRITE setCalculation NOTIFY calculationChanged FINAL)
+	Q_PROPERTY(int prestigeCalculationTime READ prestigeCalculationTime WRITE setPrestigeCalculationTime NOTIFY prestigeCalculationTimeChanged FINAL)
 	Q_PROPERTY(bool modified READ modified WRITE setModified NOTIFY modifiedChanged FINAL)
 
 public:
@@ -77,11 +78,16 @@ public:
 	bool modified() const;
 	void setModified(bool newModified);
 
+	int prestigeCalculationTime() const;
+	void setPrestigeCalculationTime(int newPrestigeCalculationTime);
+
 signals:
 	void databaseNameChanged();
 	void titleChanged();
 	void calculationChanged();
 	void modifiedChanged();
+
+	void prestigeCalculationTimeChanged();
 
 private:
 	bool calculationAddFromJson(const QJsonObject &data);
@@ -89,6 +95,7 @@ private:
 
 	QString m_databaseName = QStringLiteral("mainDb");
 	QString m_title;
+	int m_prestigeCalculationTime = -1;
 	bool m_modified = false;
 
 	std::unique_ptr<QSListModel> m_model;

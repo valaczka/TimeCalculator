@@ -238,6 +238,7 @@ std::optional<QJsonObject> Database::toJson() const
 		{ QStringLiteral("_type"), QStringLiteral("TimeCalculator") },
 		{ QStringLiteral("_version"), 0 },
 		{ QStringLiteral("title"), m_title },
+		{ QStringLiteral("prestigeCalculationTime"), m_prestigeCalculationTime },
 		{ QStringLiteral("jobs"), *jobList },
 		{ QStringLiteral("calculations"), *calcList },
 	};
@@ -298,6 +299,7 @@ Database *Database::fromJson(const QString &databaseName, const QJsonObject &jso
 	}
 
 	ptr->setTitle(json.value(QStringLiteral("title")).toString());
+	ptr->setPrestigeCalculationTime(json.value(QStringLiteral("prestigeCalculationTime")).toInt());
 	ptr->setModified(false);
 
 	return ptr.release();
@@ -636,9 +638,9 @@ QVariantList Database::overlapGet(const int &id) const
 
 	const auto &jobList = QueryBuilder::q(db)
 						  .addQuery("SELECT id, start, end, name, master, type, hour, value "
-									 "FROM overlap LEFT JOIN job ON (job.id=overlap.jobid2) "
-									 "WHERE jobid1=").addValue(id)
-								  .addQuery(" ORDER BY start")
+									"FROM overlap LEFT JOIN job ON (job.id=overlap.jobid2) "
+									"WHERE jobid1=").addValue(id)
+						  .addQuery(" ORDER BY start")
 						  .execToVariantList(converter);
 
 	if (!jobList) {
@@ -755,6 +757,8 @@ QVariantList Database::sqlMainView(QVariantMap *dest) const
 		int nextPrestigeYears = 0;
 		QDate nextPrestige;
 
+		QDate prestigeBase = QDate::currentDate();
+
 		QVariantMap toMap() const {
 			QVariantMap m;
 			m[QStringLiteral("jobYears")] = jobYears;
@@ -783,7 +787,7 @@ QVariantList Database::sqlMainView(QVariantMap *dest) const
 		}
 
 		void getNextPrestige() {
-			QDate d = QDate::currentDate()
+			QDate d = prestigeBase
 					  .addDays(-prestigeDays)
 					  .addYears(-prestigeYears);
 
@@ -801,6 +805,36 @@ QVariantList Database::sqlMainView(QVariantMap *dest) const
 				nextPrestigeYears = 0;
 			}
 		}
+
+		void truncatePrestigeAndPractice(const int &days) {
+			if (days <= 0)
+				return;
+
+			prestigeBase = prestigeBase.addDays(-days);
+
+			if (days>prestigeDays) {
+				--prestigeYears;
+				prestigeDays += 365;
+			}
+			prestigeDays -= days;
+
+			if (prestigeYears < 0) {
+				prestigeYears = 0;
+				prestigeDays = 0;
+			}
+
+			if (days>practiceDays) {
+				--practiceYears;
+				practiceDays += 365;
+			}
+			practiceDays -= days;
+
+			if (practiceYears < 0) {
+				practiceYears = 0;
+				practiceDays = 0;
+			}
+		}
+
 	};
 
 	Calc calc;
@@ -879,6 +913,12 @@ QVariantList Database::sqlMainView(QVariantMap *dest) const
 		list.append(map);
 	}
 
+	if (m_prestigeCalculationTime == 20240101) {			// Ezt még lehetne állíthatóvá tenni
+		const int &diff = QDate(2024, 1, 1).daysTo(QDate::currentDate());
+		calc.truncatePrestigeAndPractice(diff);
+	}
+
+
 	calc.normalize();
 	calc.getNextPrestige();
 
@@ -886,6 +926,19 @@ QVariantList Database::sqlMainView(QVariantMap *dest) const
 		*dest = calc.toMap();
 
 	return list;
+}
+
+int Database::prestigeCalculationTime() const
+{
+	return m_prestigeCalculationTime;
+}
+
+void Database::setPrestigeCalculationTime(int newPrestigeCalculationTime)
+{
+	if (m_prestigeCalculationTime == newPrestigeCalculationTime)
+		return;
+	m_prestigeCalculationTime = newPrestigeCalculationTime;
+	emit prestigeCalculationTimeChanged();
 }
 
 bool Database::modified() const
@@ -930,17 +983,33 @@ QString Database::toMarkdown() const
 			.append(m_title)
 			.append(QStringLiteral("</h1>"));
 
-	txt.append(QStringLiteral("<h4>Jelenlegi jogviszony (piarista): <i>%1 év %2 nap</i><br/>")
+	txt.append(QStringLiteral("<h4>Jelenlegi jogviszony - piarista (a nyomtatás napján): <i>%1 év %2 nap</i><br/>")
 			   .arg(m_calculation.value(QStringLiteral("jobYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("jobDays"), 0).toInt())
 			   );
 
-	txt.append(QStringLiteral("Gyakorlati idő: <i>%1 év %2 nap</i><br/>")
+
+	txt.append(QStringLiteral("Gyakorlati idő"));
+
+	if (m_prestigeCalculationTime == 20240101)			// TODO
+		txt.append(QStringLiteral(" ("))
+				.append(QLocale().toString(QDate(2024, 1, 1), QStringLiteral("yyyy. MMMM d")))
+				.append(QStringLiteral("-ig)"));
+
+	txt.append(QStringLiteral(": <i>%1 év %2 nap</i><br/>")
 			   .arg(m_calculation.value(QStringLiteral("practiceYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("practiceDays"), 0).toInt())
 			   );
 
-	txt.append(QStringLiteral("Jubileumi jutalom: <i>%1 év %2 nap</i></h4>")
+	txt.append(QStringLiteral("Jubileumi jutalom"));
+
+	if (m_prestigeCalculationTime == 20240101)			// TODO
+		txt.append(QStringLiteral(" ("))
+				.append(QLocale().toString(QDate(2024, 1, 1), QStringLiteral("yyyy. MMMM d")))
+				.append(QStringLiteral("-ig)"));
+
+
+	txt.append(QStringLiteral(": <i>%1 év %2 nap</i></h4>")
 			   .arg(m_calculation.value(QStringLiteral("prestigeYears"), 0).toInt())
 			   .arg(m_calculation.value(QStringLiteral("prestigeDays"), 0).toInt())
 			   );

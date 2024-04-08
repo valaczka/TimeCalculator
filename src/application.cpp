@@ -50,6 +50,7 @@ const QStringList Application::m_jobTypeList = {
 	QStringLiteral("megbízási szerződés"),
 	QStringLiteral("egyházi szolgálati jogviszony"),
 	QStringLiteral("Kjt. vagy más állami jogviszony"),
+	QStringLiteral("köznevelési foglalkoztatotti jogviszony"),
 	QStringLiteral("egyéni vállalkozó"),
 	QStringLiteral("gyermekgondozás/egyéb tartós távollét"),
 };
@@ -304,6 +305,8 @@ void Application::registerQmlTypes()
 
 	qmlRegisterUncreatableType<Application>("TimeCalculator", 1, 0, "Application", "Application is uncreatable");
 	qmlRegisterUncreatableType<Utils>("TimeCalculator", 1, 0, "Utils", "Utils is uncreatable");
+
+	qmlRegisterType<Database>("TimeCalculator", 1, 0, "Database");
 
 	//qmlRegisterType<QSJsonListModel>("QSyncable", 1, 0, "QSJsonListModel");
 	//qmlRegisterType<QSListModel>("QSyncable", 1, 0, "QSListModel");

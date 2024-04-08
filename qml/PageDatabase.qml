@@ -130,6 +130,49 @@ QPage {
 			text: App.database ? qsTr("Jubileumi jutalom: %1 év %2 nap").arg(App.database.calculation.prestigeYears).arg(App.database.calculation.prestigeDays) : ""
 		}
 
+		Row {
+			anchors.left: _view.left
+
+			spacing: 10
+
+			Qaterial.LabelCaption {
+				text: qsTr("Számított időtartamok csökkentése ide:")
+				anchors.verticalCenter: parent.verticalCenter
+			}
+
+			Qaterial.ComboBox {
+				id: _combo1
+				anchors.verticalCenter: parent.verticalCenter
+				font: Qaterial.Style.textTheme.body2
+
+				width: 200
+
+				model: [
+					{ value: -1, text: qsTr("Mai dátum") },
+					{ value: 20240101, text: new Date(2024, 0, 1).toLocaleDateString(Qt.locale(), "yyyy. MMMM d.") }
+				]
+
+				textRole: "text"
+				valueRole: "value"
+				onActivated: {
+					App.database.prestigeCalculationTime = currentValue
+					App.database.sync()
+				}
+
+				currentIndex:  {
+					if (!App.database)
+						return -1
+
+					for (let n=0; n<model.length; ++n) {
+						if (model[n].value === App.database.prestigeCalculationTime)
+							return n
+					}
+
+					return -1
+				}
+			}
+		}
+
 		Qaterial.IconLabel {
 			font: Qaterial.Style.textTheme.headline6
 			color: Qaterial.Style.accentColor
